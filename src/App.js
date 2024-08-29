@@ -30,6 +30,7 @@ const App = () => {
         <Route path="/" element={<ProtectedRoute> <DriverLayout> <UpcomingTrips /> </DriverLayout> </ProtectedRoute>} />
 
       <Route path="/driver1" element={<SignedIn> <DriverLayout>  <DriverView/></DriverLayout>   </SignedIn>  } />
+      
       <Route path="/drive" element={<SignedIn>  <DriverLayout>  <DriverHome/> </DriverLayout> </SignedIn> } /> 
       <Route path="/history" element={<SignedIn>  <DriverLayout>  <TripHistory/> </DriverLayout> </SignedIn> } />  
       <Route path="/newtrips" element={<SignedIn>  <DriverLayout>  <UpcomingTrips/> </DriverLayout> </SignedIn> } />   
