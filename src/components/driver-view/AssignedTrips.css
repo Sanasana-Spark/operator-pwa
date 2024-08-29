@@ -1,0 +1,89 @@
+/* src/components/AssignedTrips.css */
+
+/* Base styles for the AssignedTrips component */
+.assigned-trips {
+    padding: 15px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+  .back-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .header h2 {
+    font-size: 1.5em;
+    margin: 0;
+    text-align: center;
+    flex: 1;
+  }
+  
+  .trips-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .trip-card {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 0.9em;
+  }
+  
+  .trip-card h3 {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+  
+  .trip-card p {
+    margin: 5px 0;
+  }
+  
+  /* Mobile-specific styles */
+  @media (max-width: 767px) {
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .back-icon {
+      margin: 0;
+      width: 20px;
+      height: 20px;
+    }
+  
+    .header h2 {
+      font-size: 1.2em;
+      text-align: left;
+      margin: 10px 0;
+    }
+  
+    .trips-container {
+      padding: 0;
+    }
+  
+    .trip-card {
+      font-size: 0.85em;
+    }
+  
+    .trip-card h3 {
+      font-size: 1em;
+    }
+  
+    .trip-card p {
+      font-size: 0.85em;
+    }
+  }
+  
