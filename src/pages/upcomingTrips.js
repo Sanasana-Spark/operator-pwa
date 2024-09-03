@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Card, CardContent, Typography, Button, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import RequestFuel from '../components/request-fuel/requestFuel'; // Import the RequestFuel component
 
 const UpcomingTrips = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [inProgressTrip, setInProgressTrip] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,9 +31,7 @@ const UpcomingTrips = () => {
   }, [baseURL]);
 
   const handleStartTrip = (tripId) => {
-    // Confirm the action with the user
     if (window.confirm("Are you sure you want to start this trip?")) {
-      // Update the trip status to "In-progress"
       fetch(`${baseURL}/trips/${tripId}/status`, {
         method: 'PATCH',
         headers: {
@@ -46,12 +46,8 @@ const UpcomingTrips = () => {
           return response.json();
         })
         .then((updatedTrip) => {
-          // Update the local state to reflect the change
-          setTrips((prevTrips) =>
-            prevTrips.map((trip) => (trip.id === tripId ? updatedTrip : trip))
-          );
-          // Navigate to the /drive route
-          navigate('/drive');
+          setInProgressTrip(updatedTrip); // Set the in-progress trip to state
+          navigate('/drive'); // Navigate to /drive route
         })
         .catch((error) => {
           console.error('Error updating trip status:', error);
@@ -69,7 +65,7 @@ const UpcomingTrips = () => {
 
   return (
     <Box padding={2}>
-      {trips.map((trip) => (
+      {!inProgressTrip && trips.map((trip) => (
         <Card key={trip.id} variant="outlined" sx={{ marginBottom: 2 }}>
           <CardContent>
             <Typography variant="h6">LPO: {trip.lpo}</Typography>
@@ -90,6 +86,24 @@ const UpcomingTrips = () => {
           </CardContent>
         </Card>
       ))}
+
+      {inProgressTrip && (
+        <Box>
+          <Card variant="outlined" sx={{ marginBottom: 2 }}>
+            <CardContent>
+              <Typography variant="h6">Trip Details</Typography>
+              <Typography variant="body1">LPO: {inProgressTrip.lpo}</Typography>
+              <Typography variant="body1">Start: {inProgressTrip.start}</Typography>
+              <Typography variant="body1">Destination: {inProgressTrip.destination}</Typography>
+              <Typography variant="body2">Date: {new Date(inProgressTrip.date).toLocaleDateString()}</Typography>
+              <Typography variant="body2">Status: {inProgressTrip.status}</Typography>
+            </CardContent>
+          </Card>
+
+          {/* Render the RequestFuel component and pass necessary props */}
+          <RequestFuel trip={inProgressTrip} baseURL={baseURL} />
+        </Box>
+      )}
     </Box>
   );
 };
