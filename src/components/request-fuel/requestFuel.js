@@ -1,82 +1,84 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
+import { Button, Typography, Box, Modal, Card, CardContent } from '@mui/material';
 
-const RequestFuel = ({ trip, baseURL, onFuelRequestSuccess }) => {
+const RequestFuel = ({ trip, baseURL }) => {
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [creditedAmount, setCreditedAmount] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [fuelDetails, setFuelDetails] = useState(null);
-  const [error, setError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const handleFuelRequest = () => {
-    setLoading(true);
+  const handleOpenModal = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
 
-    // Simulate taking a picture directly (you would replace this with actual camera API logic)
-    const takePicture = () => {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve("mock-odometer-image.jpg"), 2000); // Simulated delay
-      });
-    };
-
-    takePicture().then((odometerImage) => {
-      fetch(`${baseURL}/fuel/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          f_created_by: "Driver", // Replace with actual data
-          f_organization_id: trip.organization_id,
-          f_operator_id: trip.operator_id,
-          f_asset_id: trip.asset_id,
-          f_trip_id: trip.id,
-          f_odometer_image: odometerImage, // This is the simulated image
-        }),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Failed to request fuel');
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setFuelDetails(data);
-          onFuelRequestSuccess(); // Notify parent component that fuel was successfully requested
-        })
-        .catch((error) => {
-          setError(error.message);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    });
+  const handleCapture = (event) => {
+    const image = event.target.files[0];
+    setCapturedImage(image);
   };
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const handleSubmit = () => {
+    if (!capturedImage) {
+      alert('Please capture an odometer image first.');
+      return;
+    }
+
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append('f_created_by', trip.userId);
+    formData.append('f_organization_id', trip.org_id);
+    formData.append('f_operator_id', trip.t_operator_id);
+    formData.append('f_asset_id', trip.t_asset_id);
+    formData.append('f_trip_id', trip.id);
+    formData.append('f_odometer_image', capturedImage);
+
+    fetch(`${baseURL}/fuel/create`, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setLoading(false);
+        setCreditedAmount(data.creditedAmount); // Assuming the backend response contains 'creditedAmount'
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.error('Error submitting fuel request:', error);
+      });
+  };
 
   return (
     <Box>
-      <Button variant="contained" color="secondary" onClick={handleFuelRequest}>
+      <Button variant="contained" color="primary" onClick={handleOpenModal}>
         Request Fuel
       </Button>
-      {fuelDetails && (
-        <Box mt={2}>
-          <Typography variant="h6">Fuel Request Details:</Typography>
-          <Typography variant="body1">Amount: {fuelDetails.amount}</Typography>
-          <Typography variant="body1">Fuel Station: {fuelDetails.station}</Typography>
-        </Box>
-      )}
-      {error && (
-        <Box mt={2}>
-          <Typography variant="body1" color="error">
-            Error: {error}
-          </Typography>
-        </Box>
-      )}
+
+      <Modal open={modalOpen} onClose={handleCloseModal}>
+        <Card sx={{ maxWidth: 500, margin: 'auto', mt: 4, p: 2 }}>
+          <CardContent>
+            <Typography variant="h6">Upload Odometer Image</Typography>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleCapture}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmit}
+              sx={{ mt: 2 }}
+              disabled={loading}
+            >
+              {loading ? 'Requesting...' : 'Submit Request'}
+            </Button>
+            {creditedAmount && (
+              <Typography variant="body1" sx={{ mt: 2 }}>
+                Fuel credited: ${creditedAmount}
+              </Typography>
+            )}
+          </CardContent>
+        </Card>
+      </Modal>
     </Box>
   );
 };
