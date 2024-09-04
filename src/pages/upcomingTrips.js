@@ -1,14 +1,14 @@
-/* eslint-disable no-undef */
 import React, { useState, useEffect } from 'react';
 import { Box, Card, CardContent, Typography, Button, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import RequestFuel from '../components/request-fuel/requestFuel'; // Import the RequestFuel component
+import RequestFuel from '../components/request-fuel/requestFuel';
 
 const UpcomingTrips = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [inProgressTrip, setInProgressTrip] = useState(null);
+  const [fuelRequested, setFuelRequested] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,13 +46,16 @@ const UpcomingTrips = () => {
           return response.json();
         })
         .then((updatedTrip) => {
-          setInProgressTrip(updatedTrip); // Set the in-progress trip to state
-          navigate('/drive'); // Navigate to /drive route
+          setInProgressTrip(updatedTrip);
         })
         .catch((error) => {
           console.error('Error updating trip status:', error);
         });
     }
+  };
+
+  const handleFuelRequestComplete = () => {
+    setFuelRequested(true);
   };
 
   if (loading) {
@@ -87,22 +90,19 @@ const UpcomingTrips = () => {
         </Card>
       ))}
 
-      {inProgressTrip && (
-        <Box>
-          <Card variant="outlined" sx={{ marginBottom: 2 }}>
-            <CardContent>
-              <Typography variant="h6">Trip Details</Typography>
-              <Typography variant="body1">LPO: {inProgressTrip.lpo}</Typography>
-              <Typography variant="body1">Start: {inProgressTrip.start}</Typography>
-              <Typography variant="body1">Destination: {inProgressTrip.destination}</Typography>
-              <Typography variant="body2">Date: {new Date(inProgressTrip.date).toLocaleDateString()}</Typography>
-              <Typography variant="body2">Status: {inProgressTrip.status}</Typography>
-            </CardContent>
-          </Card>
+      {inProgressTrip && !fuelRequested && (
+        <RequestFuel trip={inProgressTrip} baseURL={baseURL} onFuelRequestComplete={handleFuelRequestComplete} />
+      )}
 
-          {/* Render the RequestFuel component and pass necessary props */}
-          <RequestFuel trip={inProgressTrip} baseURL={baseURL} />
-        </Box>
+      {inProgressTrip && fuelRequested && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate('/drive')}
+          sx={{ marginTop: 2 }}
+        >
+          Start Trip
+        </Button>
       )}
     </Box>
   );
