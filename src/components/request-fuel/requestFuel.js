@@ -1,64 +1,81 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, TextField, Modal } from '@mui/material';
+import { Box, Button, Typography, CircularProgress } from '@mui/material';
 
-const RequestFuel = ({ trip, baseURL, onFuelRequestComplete }) => {
-  const [odometerImage, setOdometerImage] = useState(null);
-  const [responseMessage, setResponseMessage] = useState('');
-  const [isRequesting, setIsRequesting] = useState(false);
+const RequestFuel = ({ trip, baseURL, onFuelRequestSuccess }) => {
+  const [loading, setLoading] = useState(false);
+  const [fuelDetails, setFuelDetails] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setIsRequesting(true);
+  const handleFuelRequest = () => {
+    setLoading(true);
 
-    const payload = {
-      f_created_by: trip.userId,
-      f_organization_id: trip.org_id,
-      f_operator_id: trip.t_operator_id,
-      f_asset_id: trip.t_asset_id,
-      f_trip_id: trip.id,
-      f_odometer_image: odometerImage,
+    // Simulate taking a picture directly (you would replace this with actual camera API logic)
+    const takePicture = () => {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve("mock-odometer-image.jpg"), 2000); // Simulated delay
+      });
     };
 
-    try {
-      const response = await fetch(`${baseURL}/fuel/create`, {
+    takePicture().then((odometerImage) => {
+      fetch(`${baseURL}/fuel/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-      setResponseMessage(`Fuel request successful! Amount credited: ${data.amount}`);
-      onFuelRequestComplete(); // Notify parent component that fuel request is complete
-    } catch (error) {
-      console.error('Error submitting fuel request:', error);
-      setResponseMessage('Fuel request failed. Please try again.');
-    } finally {
-      setIsRequesting(false);
-    }
+        body: JSON.stringify({
+          f_created_by: "Driver", // Replace with actual data
+          f_organization_id: trip.organization_id,
+          f_operator_id: trip.operator_id,
+          f_asset_id: trip.asset_id,
+          f_trip_id: trip.id,
+          f_odometer_image: odometerImage, // This is the simulated image
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Failed to request fuel');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setFuelDetails(data);
+          onFuelRequestSuccess(); // Notify parent component that fuel was successfully requested
+        })
+        .catch((error) => {
+          setError(error.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    });
   };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          type="file"
-          onChange={(e) => setOdometerImage(e.target.files[0])}
-          required
-        />
-        <Button type="submit" variant="contained" disabled={isRequesting}>
-          {isRequesting ? 'Requesting...' : 'Request Fuel'}
-        </Button>
-      </form>
-      {responseMessage && (
-        <Typography variant="body1" color="primary" sx={{ marginTop: 2 }}>
-          {responseMessage}
-        </Typography>
+      <Button variant="contained" color="secondary" onClick={handleFuelRequest}>
+        Request Fuel
+      </Button>
+      {fuelDetails && (
+        <Box mt={2}>
+          <Typography variant="h6">Fuel Request Details:</Typography>
+          <Typography variant="body1">Amount: {fuelDetails.amount}</Typography>
+          <Typography variant="body1">Fuel Station: {fuelDetails.station}</Typography>
+        </Box>
+      )}
+      {error && (
+        <Box mt={2}>
+          <Typography variant="body1" color="error">
+            Error: {error}
+          </Typography>
+        </Box>
       )}
     </Box>
   );
