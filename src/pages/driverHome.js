@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from "react";
 import Map from "../components/maps/singleTripMap";
 import { Button, Box, Typography, Card, CardContent, Grid, CircularProgress } from "@mui/material";
-import RequestFuel from "../components/request-fuel/requestFuel"; //
-import Loader from "../components/loader";
+import RequestFuel from "../components/request-fuel/requestFuel";
 import { useAuthContext } from "../components/onboarding/authProvider";
 import Asset_icon from '../assets/asset_icon.png';
 
 const DriverHome = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const { userId, org_id } = useAuthContext();
+  const { userId, org_id, userEmail } = useAuthContext(); // Added userEmail for fetching driver-specific trips
   const [loading, setLoading] = useState(true);
   const [inProgressTrip, setInProgressTrip] = useState(null);
   const [inProgressTripId, setInProgressTripId] = useState(null);
   const [startPoint, setStartPoint] = useState({ lat: 5.66667, lng: 0.0 });
   const [endPoint, setEndPoint] = useState({ lat: 5.66667, lng: 0.0 });
-  const [requestFuelOpen, setRequestFuelOpen] = useState(false); // State to handle the RequestFuel component visibility
+  const [fuelRequested, setFuelRequested] = useState(false); // Track if fuel has been requested
+  const [requestFuelOpen, setRequestFuelOpen] = useState(false);
 
   useEffect(() => {
-    const apiUrl = `${baseURL}/trips`;
+    const apiUrl = `${baseURL}/trips?userEmail=${userEmail}`;  // Adjusted to fetch trips for the logged-in driver
 
     fetch(apiUrl)
       .then((response) => {
@@ -41,27 +41,21 @@ const DriverHome = () => {
         console.error("Error fetching data:", error);
         setLoading(false);
       });
-  }, [baseURL]);
+  }, [baseURL, userEmail]);
 
-  const handleRequestFuel = (capturedImage) => {
-    capturedImage.preventDefault();
-
+  const handleRequestFuel = (capturedImageFile) => {
     if (inProgressTripId) {
-      const payload = {
-        f_created_by: userId,
-        f_organization_id: org_id,
-        f_operator_id: inProgressTrip.t_operator_id,
-        f_asset_id: inProgressTrip.t_asset_id,
-        f_trip_id: inProgressTripId,
-        f_odometer_image: capturedImage,
-      };
+      const formData = new FormData();
+      formData.append('f_created_by', userId);
+      formData.append('f_organization_id', org_id);
+      formData.append('f_operator_id', inProgressTrip.t_operator_id);
+      formData.append('f_asset_id', inProgressTrip.t_asset_id);
+      formData.append('f_trip_id', inProgressTripId);
+      formData.append('f_odometer_image', capturedImageFile);
 
       fetch(`${baseURL}/fuel/create`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        body: formData,
       })
         .then((response) => {
           if (!response.ok) {
@@ -70,11 +64,11 @@ const DriverHome = () => {
           return response.json();
         })
         .then((data) => {
-          console.log("Success:", data);
-          // Optionally display or handle the response data (e.g., money credited)
+          console.log("Fuel request success:", data);
+          setFuelRequested(true);  // Mark fuel as requested
         })
         .catch((error) => {
-          console.error("Error submitting data:", error);
+          console.error("Error submitting fuel request:", error);
         });
     } else {
       console.error("No in-progress trip found.");
@@ -84,11 +78,13 @@ const DriverHome = () => {
   const handleOpenRequestFuel = () => setRequestFuelOpen(true);
   const handleCloseRequestFuel = () => setRequestFuelOpen(false);
 
-  if (loading) return (
-    <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-      <CircularProgress />
-    </Box>
-  );
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -126,10 +122,16 @@ const DriverHome = () => {
           >
             Request Fuel
           </Button>
+          {/* Pass the necessary props to RequestFuel */}
           <RequestFuel
             open={requestFuelOpen}
             onSubmit={handleRequestFuel}
             onCancel={handleCloseRequestFuel}
+            inProgressTripId={inProgressTripId}
+            userId={userId}
+            org_id={org_id}
+            inProgressTrip={inProgressTrip}
+            baseURL={baseURL}
           />
         </Box>
       )}

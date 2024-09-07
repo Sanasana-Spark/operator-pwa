@@ -1,85 +1,52 @@
-import React, { useState } from 'react';
-import { Button, Typography, Box, Modal, Card, CardContent } from '@mui/material';
+import React, { useState } from "react";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 
-const RequestFuel = ({ trip, baseURL }) => {
+// Fixing the paths by moving one directory up
+import { useAuthContext } from "../onboarding/authProvider"; 
+import Asset_icon from '../../assets/asset_icon.png'; // Adjust the path
+
+const RequestFuel = ({
+  open,
+  onSubmit,
+  onCancel,
+  inProgressTripId,
+  userId,
+  org_id,
+  inProgressTrip,
+  baseURL,
+  setFuelRequested
+}) => {
   const [capturedImage, setCapturedImage] = useState(null);
-  const [creditedAmount, setCreditedAmount] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
 
-  const handleOpenModal = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
-
-  const handleCapture = (event) => {
-    const image = event.target.files[0];
-    setCapturedImage(image);
+  const handleImageCapture = (event) => {
+    setCapturedImage(event.target.files[0]);  // Store the captured image file
   };
 
   const handleSubmit = () => {
-    if (!capturedImage) {
-      alert('Please capture an odometer image first.');
-      return;
+    if (capturedImage) {
+      onSubmit(capturedImage);  // Pass the captured image to the parent function
+    } else {
+      alert("Please capture an image of the odometer.");
     }
-
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append('f_created_by', trip.userId);
-    formData.append('f_organization_id', trip.org_id);
-    formData.append('f_operator_id', trip.t_operator_id);
-    formData.append('f_asset_id', trip.t_asset_id);
-    formData.append('f_trip_id', trip.id);
-    formData.append('f_odometer_image', capturedImage);
-
-    fetch(`${baseURL}/fuel/create`, {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setLoading(false);
-        setCreditedAmount(data.creditedAmount); // Assuming the backend response contains 'creditedAmount'
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.error('Error submitting fuel request:', error);
-      });
   };
 
   return (
-    <Box>
-      <Button variant="contained" color="primary" onClick={handleOpenModal}>
-        Request Fuel
-      </Button>
-
-      <Modal open={modalOpen} onClose={handleCloseModal}>
-        <Card sx={{ maxWidth: 500, margin: 'auto', mt: 4, p: 2 }}>
-          <CardContent>
-            <Typography variant="h6">Upload Odometer Image</Typography>
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleCapture}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit}
-              sx={{ mt: 2 }}
-              disabled={loading}
-            >
-              {loading ? 'Requesting...' : 'Submit Request'}
-            </Button>
-            {creditedAmount && (
-              <Typography variant="body1" sx={{ mt: 2 }}>
-                Fuel credited: ${creditedAmount}
-              </Typography>
-            )}
-          </CardContent>
-        </Card>
-      </Modal>
-    </Box>
+    <Dialog open={open} onClose={onCancel}>
+      <DialogTitle>Request Fuel</DialogTitle>
+      <DialogContent>
+        {/* Camera input for capturing the image */}
+        <input 
+          type="file" 
+          accept="image/*" 
+          capture="environment"  // This tells the browser to open the camera
+          onChange={handleImageCapture} 
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onCancel} color="primary">Cancel</Button>
+        <Button onClick={handleSubmit} color="primary">Submit</Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
