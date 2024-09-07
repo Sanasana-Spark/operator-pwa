@@ -7,17 +7,18 @@ import Asset_icon from '../assets/asset_icon.png';
 
 const DriverHome = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const { userId, org_id, userEmail } = useAuthContext(); // Added userEmail for fetching driver-specific trips
+  const { userId, org_id, userEmail } = useAuthContext();
   const [loading, setLoading] = useState(true);
   const [inProgressTrip, setInProgressTrip] = useState(null);
   const [inProgressTripId, setInProgressTripId] = useState(null);
   const [startPoint, setStartPoint] = useState({ lat: 5.66667, lng: 0.0 });
   const [endPoint, setEndPoint] = useState({ lat: 5.66667, lng: 0.0 });
-  const [fuelRequested, setFuelRequested] = useState(false); // Track if fuel has been requested
+  const [fuelRequested, setFuelRequested] = useState(false);
   const [requestFuelOpen, setRequestFuelOpen] = useState(false);
+  const [fuelAllocated, setFuelAllocated] = useState(null);
 
   useEffect(() => {
-    const apiUrl = `${baseURL}/trips?userEmail=${userEmail}`;  // Adjusted to fetch trips for the logged-in driver
+    const apiUrl = `${baseURL}/trips?userEmail=${userEmail}`;
 
     fetch(apiUrl)
       .then((response) => {
@@ -53,25 +54,29 @@ const DriverHome = () => {
       formData.append('f_trip_id', inProgressTripId);
       formData.append('f_odometer_image', capturedImageFile);
 
-      fetch(`${baseURL}/fuel/create`, {
+      return fetch(`${baseURL}/fuel/create`, {
         method: "POST",
         body: formData,
       })
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Network response was not ok");
+            return response.json().then((errorData) => {
+              throw new Error("Backend error: " + (errorData.message || "Unknown error"));
+            });
           }
           return response.json();
         })
         .then((data) => {
-          console.log("Fuel request success:", data);
-          setFuelRequested(true);  // Mark fuel as requested
+          setFuelAllocated(data.fuel_allocated);  // Store fuel allocated response
+          return data; // Return the data to handle in the component
         })
         .catch((error) => {
           console.error("Error submitting fuel request:", error);
+          throw error; // Rethrow error to be handled in component
         });
     } else {
       console.error("No in-progress trip found.");
+      return Promise.reject(new Error("No in-progress trip found."));
     }
   };
 
@@ -105,24 +110,45 @@ const DriverHome = () => {
               </Grid>
             </CardContent>
           </Card>
-          <Button
-            onClick={handleOpenRequestFuel}
-            sx={{
-              position: 'absolute',
-              bottom: 80,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              backgroundColor: '#01947A',
-              color: 'white',
-              boxShadow: 3,
-              '&:hover': {
-                backgroundColor: '#047A9A',
-              },
-            }}
-          >
-            Request Fuel
-          </Button>
-          {/* Pass the necessary props to RequestFuel */}
+          {!fuelRequested ? (
+            <Button
+              onClick={handleOpenRequestFuel}
+              sx={{
+                position: 'absolute',
+                bottom: 80,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: '#01947A',
+                color: 'white',
+                boxShadow: 3,
+                '&:hover': {
+                  backgroundColor: '#047A9A',
+                },
+              }}
+            >
+              Request Fuel
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                // Implement start trip functionality here if needed
+              }}
+              sx={{
+                position: 'absolute',
+                bottom: 80,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: '#01947A',
+                color: 'white',
+                boxShadow: 3,
+                '&:hover': {
+                  backgroundColor: '#047A9A',
+                },
+              }}
+            >
+              Start Trip
+            </Button>
+          )}
           <RequestFuel
             open={requestFuelOpen}
             onSubmit={handleRequestFuel}
@@ -132,6 +158,9 @@ const DriverHome = () => {
             org_id={org_id}
             inProgressTrip={inProgressTrip}
             baseURL={baseURL}
+            setFuelRequested={setFuelRequested}
+            setFuelAllocated={setFuelAllocated}
+            fuelAllocated={fuelAllocated}
           />
         </Box>
       )}
@@ -140,3 +169,4 @@ const DriverHome = () => {
 };
 
 export default DriverHome;
+ 
