@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Box, CircularProgress } from "@mui/material";
 
 const RequestFuel = ({
@@ -17,6 +17,7 @@ const RequestFuel = ({
   const [loading, setLoading] = useState(false); // State for loading status
   const [error, setError] = useState(null); // State for error messages
   const [fuelAllocated, setLocalFuelAllocated] = useState(null); // Local state for fuel allocation
+  const inputRef = useRef(null); // Reference to the hidden input
 
   const handleImageCapture = (event) => {
     setCapturedImage(event.target.files[0]); // Store the captured image file
@@ -48,9 +49,11 @@ const RequestFuel = ({
         .then((data) => {
           setLocalFuelAllocated(data.fuel_allocated); // Update local state with fuel allocated response
           setFuelRequested(true); // Mark fuel as requested
-          setLoading(false); // Set loading state to false
           setFuelAllocated(data.fuel_allocated); // Update parent state with allocated fuel
-          onCloseModal(); // Close the modal after submission
+          setLoading(false); // Set loading state to false
+          setTimeout(() => {
+            onCloseModal(); // Close the modal after 3 seconds
+          }, 3000);
         })
         .catch((error) => {
           setError(error.message); // Set error message
@@ -80,16 +83,33 @@ const RequestFuel = ({
         <Typography variant="body1" paragraph>
           Capture an image of the odometer to request fuel for your trip.
         </Typography>
+        
+        {/* Hidden file input */}
         <input
+          ref={inputRef}
           type="file"
           accept="image/*"
           capture="environment" // Opens the camera
           onChange={handleImageCapture}
-          style={{ marginBottom: "20px", width: "100%" }}
+          style={{ display: 'none' }} // Hides the input field
         />
+
+        {/* Custom button to trigger the camera */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => inputRef.current.click()} // Opens the camera when clicked
+          style={{ marginBottom: "20px", display: 'block', margin: 'auto' }}
+        >
+          Open Camera
+        </Button>
+
         {loading && (
-          <Box display="flex" justifyContent="center" alignItems="center">
+          <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column">
             <CircularProgress />
+            <Typography variant="h6" color="textSecondary" mt={2}>
+              Processing...
+            </Typography>
           </Box>
         )}
         {error && (
