@@ -77,11 +77,11 @@ const UpcomingTrips = () => {
       {!inProgressTrip && trips.map((trip) => (
         <Card key={trip.id} variant="outlined" sx={{ marginBottom: 2 }}>
           <CardContent>
-            <Typography variant="h6">LPO: {trip.lpo}</Typography>
-            <Typography variant="body1">Start: {trip.start}</Typography>
-            <Typography variant="body1">Destination: {trip.destination}</Typography>
-            <Typography variant="body2">Date: {new Date(trip.date).toLocaleDateString()}</Typography>
-            <Typography variant="body2">Status: {trip.status}</Typography>
+          <Typography variant="h6">LPO: {trip.t_type}</Typography>
+            <Typography variant="body1">Start: {trip.t_origin_place_query}</Typography>
+            <Typography variant="body1">Destination: {trip.t_destination_place_query}</Typography>
+            <Typography variant="body2">Date: {new Date(trip.t_start_date).toLocaleDateString()}</Typography>
+            <Typography variant="body2">Status: {trip.t_status}</Typography>
             {trip.status === 'Pending' && (
               <>
                 <RequestFuel trip={trip} baseURL={baseURL} onFuelRequestSuccess={handleFuelRequestSuccess} />
