@@ -1,19 +1,20 @@
-import React, { useState, useRef } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Box, CircularProgress } from "@mui/material";
+/* eslint-disable no-undef */
+import React, { useState, useRef } from 'react';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Box, CircularProgress } from '@mui/material';
 
 const RequestFuel = ({
   open,
   onCancel,
-  inProgressTripId,
+  trip,
   userId,
   org_id,
-  inProgressTrip,
   baseURL,
   setFuelRequested,
   setFuelAllocated,
-  onCloseModal // Handler to close the modal
+  onCloseModal, // Handler to close the modal
 }) => {
   const [capturedImage, setCapturedImage] = useState(null); // State for captured image
+  const [readingNote, setReadingNote] = useState(''); // State for odometer reading note
   const [loading, setLoading] = useState(false); // State for loading status
   const [error, setError] = useState(null); // State for error messages
   const [fuelAllocated, setLocalFuelAllocated] = useState(null); // Local state for fuel allocation
@@ -24,18 +25,19 @@ const RequestFuel = ({
   };
 
   const handleSubmit = () => {
-    if (capturedImage) {
+    if (capturedImage && readingNote) {
       setLoading(true); // Set loading state to true
       const formData = new FormData();
       formData.append('f_created_by', userId);
       formData.append('f_organization_id', org_id);
-      formData.append('f_operator_id', inProgressTrip.t_operator_id);
-      formData.append('f_asset_id', inProgressTrip.t_asset_id);
-      formData.append('f_trip_id', inProgressTripId);
+      formData.append('f_operator_id', trip.t_operator_id);
+      formData.append('f_asset_id', trip.t_asset_id);
+      formData.append('f_trip_id', trip.id); // Use trip ID
       formData.append('f_odometer_image', capturedImage);
+      formData.append('f_reading_note', readingNote); // Add reading note
 
-      fetch(`${baseURL}/fuel/create`, {
-        method: "POST",
+      fetch(`${baseURL}/odometer/readings`, { // Update endpoint to handle multiple readings
+        method: 'POST',
         body: formData,
       })
         .then((response) => {
@@ -60,7 +62,7 @@ const RequestFuel = ({
           setLoading(false); // Set loading state to false
         });
     } else {
-      alert("Please capture an image of the odometer.");
+      alert("Please capture an image of the odometer and add a reading note.");
     }
   };
 
@@ -78,12 +80,12 @@ const RequestFuel = ({
         }
       }}
     >
-      <DialogTitle>Request Fuel</DialogTitle>
+      <DialogTitle>Submit Odometer Reading</DialogTitle>
       <DialogContent>
         <Typography variant="body1" paragraph>
-          Capture an image of the odometer to request fuel for your trip.
+          Capture an image of the odometer and provide a note for the reading.
         </Typography>
-        
+
         {/* Hidden file input */}
         <input
           ref={inputRef}
@@ -103,6 +105,15 @@ const RequestFuel = ({
         >
           Open Camera
         </Button>
+
+        {/* Text area for reading note */}
+        <textarea
+          rows="4"
+          placeholder="Add a note for this reading..."
+          value={readingNote}
+          onChange={(e) => setReadingNote(e.target.value)}
+          style={{ width: '100%', marginBottom: '20px' }}
+        />
 
         {loading && (
           <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column">

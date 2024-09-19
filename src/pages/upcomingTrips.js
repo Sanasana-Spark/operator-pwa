@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Card, CardContent, Typography, Button, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import RequestFuel from '../components/request-fuel/requestFuel'; // Import the RequestFuel component
+import RequestFuel from '../components/request-fuel/RequestFuel'; // Import the RequestFuel component
 
 const UpcomingTrips = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [inProgressTrip, setInProgressTrip] = useState(null);
-  const [fuelRequested, setFuelRequested] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState(null); // State for the selected trip
+  const [fuelRequested, setFuelRequested] = useState({}); // Track fuel request status per trip
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,10 +31,15 @@ const UpcomingTrips = () => {
       });
   }, [baseURL]);
 
-  const handleStartTrip = (tripId) => {
+  const handleTripClick = (trip) => {
+    setSelectedTrip(trip);
+    setFuelRequested(fuelRequested[trip.id] || false); // Update fuel request status for selected trip
+  };
+
+  const handleStartTrip = () => {
     if (fuelRequested) {
       if (window.confirm("Are you sure you want to start this trip?")) {
-        fetch(`${baseURL}/trips/${tripId}/status`, {
+        fetch(`${baseURL}/trips/${selectedTrip.id}/status`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -48,7 +53,7 @@ const UpcomingTrips = () => {
             return response.json();
           })
           .then((updatedTrip) => {
-            setInProgressTrip(updatedTrip); // Set the in-progress trip to state
+            setSelectedTrip(updatedTrip); // Set the in-progress trip to state
             navigate('/drive'); // Navigate to /drive route
           })
           .catch((error) => {
@@ -60,8 +65,8 @@ const UpcomingTrips = () => {
     }
   };
 
-  const handleFuelRequestSuccess = () => {
-    setFuelRequested(true);
+  const handleFuelRequestSuccess = (tripId) => {
+    setFuelRequested((prev) => ({ ...prev, [tripId]: true }));
   };
 
   if (loading) {
@@ -74,23 +79,28 @@ const UpcomingTrips = () => {
 
   return (
     <Box padding={2}>
-      {!inProgressTrip && trips.map((trip) => (
-        <Card key={trip.id} variant="outlined" sx={{ marginBottom: 2 }}>
+      {trips.map((trip) => (
+        <Card key={trip.id} variant="outlined" sx={{ marginBottom: 2 }} onClick={() => handleTripClick(trip)}>
           <CardContent>
-          <Typography variant="h6">LPO: {trip.t_type}</Typography>
+            <Typography variant="h6">LPO: {trip.t_type}</Typography>
             <Typography variant="body1">Start: {trip.t_origin_place_query}</Typography>
             <Typography variant="body1">Destination: {trip.t_destination_place_query}</Typography>
             <Typography variant="body2">Date: {new Date(trip.t_start_date).toLocaleDateString()}</Typography>
             <Typography variant="body2">Status: {trip.t_status}</Typography>
-            {trip.status === 'Pending' && (
+            {selectedTrip && selectedTrip.id === trip.id && trip.t_status === 'In-progress' && (
               <>
-                <RequestFuel trip={trip} baseURL={baseURL} onFuelRequestSuccess={handleFuelRequestSuccess} />
+                <RequestFuel
+                  open={selectedTrip.id === trip.id}
+                  trip={trip}
+                  baseURL={baseURL}
+                  onCloseModal={() => setSelectedTrip(null)} // Close modal when odometer reading is submitted
+                  setFuelRequested={handleFuelRequestSuccess}
+                />
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => handleStartTrip(trip.id)}
+                  onClick={handleStartTrip}
                   sx={{ marginTop: 2 }}
-                  disabled={!fuelRequested} // Disable Start Trip button until fuel is requested
                 >
                   Start Trip
                 </Button>
@@ -100,16 +110,16 @@ const UpcomingTrips = () => {
         </Card>
       ))}
 
-      {inProgressTrip && (
+      {selectedTrip && (
         <Box>
           <Card variant="outlined" sx={{ marginBottom: 2 }}>
             <CardContent>
               <Typography variant="h6">Trip Details</Typography>
-              <Typography variant="body1">LPO: {inProgressTrip.lpo}</Typography>
-              <Typography variant="body1">Start: {inProgressTrip.start}</Typography>
-              <Typography variant="body1">Destination: {inProgressTrip.destination}</Typography>
-              <Typography variant="body2">Date: {new Date(inProgressTrip.date).toLocaleDateString()}</Typography>
-              <Typography variant="body2">Status: {inProgressTrip.status}</Typography>
+              <Typography variant="body1">LPO: {selectedTrip.t_type}</Typography>
+              <Typography variant="body1">Start: {selectedTrip.t_origin_place_query}</Typography>
+              <Typography variant="body1">Destination: {selectedTrip.t_destination_place_query}</Typography>
+              <Typography variant="body2">Date: {new Date(selectedTrip.t_start_date).toLocaleDateString()}</Typography>
+              <Typography variant="body2">Status: {selectedTrip.t_status}</Typography>
             </CardContent>
           </Card>
         </Box>
