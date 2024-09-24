@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Map from "../components/maps/singleTripMap";
-import { Box, Typography, Card, CardContent, Grid, CircularProgress, Button } from "@mui/material";
+import { Box, Typography, Card, CardContent, Grid, CircularProgress } from "@mui/material";
 import { useAuthContext } from "../components/onboarding/authProvider";
 import Asset_icon from '../assets/asset_icon.png';
 
@@ -9,7 +9,6 @@ const DriverHome = () => {
   const { userId, org_id, userEmail } = useAuthContext();
   const [loading, setLoading] = useState(true);
   const [inProgressTrip, setInProgressTrip] = useState(null);
-  const [trips, setTrips] = useState([]);
   const [startPoint, setStartPoint] = useState({ lat: 5.66667, lng: 0.0 });
   const [endPoint, setEndPoint] = useState({ lat: 5.66667, lng: 0.0 });
 
@@ -25,7 +24,7 @@ const DriverHome = () => {
       })
       .then((data) => {
         setLoading(false);
-        setTrips(data);
+
         const inProgressTrip = data.find((trip) => trip.t_status === "In-progress");
         if (inProgressTrip) {
           setInProgressTrip(inProgressTrip);
@@ -38,54 +37,6 @@ const DriverHome = () => {
         setLoading(false);
       });
   }, [baseURL, userEmail]);
-
-  const handleStartTrip = async (tripId) => {
-    try {
-      const response = await fetch(`${baseURL}/trips/${tripId}/start`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tripId }),
-      });
-
-      if (response.ok) {
-        const updatedTrip = trips.find(trip => trip.id === tripId);
-        setInProgressTrip({ ...updatedTrip, t_status: 'In-progress' });
-      }
-    } catch (error) {
-      console.error('Error starting trip:', error);
-    }
-  };
-
-  const handleSubmitOdometer = async (tripId, isComplete) => {
-    // Here is where you would handle uploading the odometer image to your backend
-    try {
-      const response = await fetch(`${baseURL}/trips/${tripId}/odometer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tripId, isComplete }),
-      });
-
-      if (response.ok) {
-        if (isComplete) {
-          setInProgressTrip(null); // The trip is now complete
-        } else {
-          alert('Odometer reading submitted');
-        }
-      }
-    } catch (error) {
-      console.error('Error submitting odometer reading:', error);
-    }
-  };
-
-  const handleOdometerCapture = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      // This is where you handle the odometer image submission (can be uploaded to backend)
-      console.log('Odometer image captured:', file);
-    }
-  };
-
-  const canStartTrip = trips.some(trip => trip.t_status === 'Fuel Requested' && !inProgressTrip);
 
   if (loading) {
     return (
@@ -114,40 +65,7 @@ const DriverHome = () => {
               </Grid>
             </CardContent>
           </Card>
-          
-          {/* Odometer submission and trip completion functionality */}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleOdometerCapture}
-            capture="camera"
-          />
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => handleSubmitOdometer(inProgressTrip.id, false)}
-          >
-            Submit Odometer Reading
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleSubmitOdometer(inProgressTrip.id, true)}
-          >
-            Complete Trip
-          </Button>
         </Box>
-      )}
-
-      {/* Start trip button */}
-      {!inProgressTrip && canStartTrip && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleStartTrip(trips.find(trip => trip.t_status === 'Fuel Requested').id)}
-        >
-          Start Trip
-        </Button>
       )}
     </>
   );
