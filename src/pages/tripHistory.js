@@ -1,16 +1,18 @@
-/* eslint-disable no-undef */
-import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Button, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Box, Typography, Button, CircularProgress, Card, CardContent, Grid } from "@mui/material";
+import { useAuthContext } from "../components/onboarding/authProvider";
+import Asset_icon from '../assets/asset_icon.png';
 
 const TripHistory = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const [trips, setTrips] = useState([]);
+  const { userId, org_id, userEmail } = useAuthContext();
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [tripList, setTripList] = useState([]);
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
   useEffect(() => {
-    const apiUrl = `${baseURL}/trips`;
+    const apiUrl = `${baseURL}/trips?userEmail=${userEmail}`;
+
     fetch(apiUrl)
       .then((response) => {
         if (!response.ok) {
@@ -19,43 +21,37 @@ const TripHistory = () => {
         return response.json();
       })
       .then((data) => {
-        setTrips(data);
+        setTripList(data);
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
         setLoading(false);
       });
-  }, [baseURL]);
+  }, [baseURL, userEmail]);
 
-  const handleStartTrip = (tripId) => {
-    // Confirm the action with the user
-    if (window.confirm("Are you sure you want to start this trip?")) {
-      // Update the trip status to "In-progress"
-      fetch(`${baseURL}/trips/${tripId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'In-progress' }),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Failed to update trip status');
-          }
-          return response.json();
-        })
-        .then((updatedTrip) => {
-          // Update the local state to reflect the change
-          setTrips((prevTrips) =>
-            prevTrips.map((trip) => (trip.id === tripId ? updatedTrip : trip))
-          );
-          // Navigate to the /drive route
-          navigate('/drive');
-        })
-        .catch((error) => {
-          console.error('Error updating trip status:', error);
-        });
+  const handleSelectTrip = (trip) => {
+    setSelectedTrip(trip);
+  };
+
+  const handleSubmitOdometer = async (tripId, isComplete) => {
+    try {
+      const response = await fetch(`${baseURL}/trips/${tripId}/odometer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId, isComplete }),
+      });
+
+      if (response.ok) {
+        if (isComplete) {
+          setSelectedTrip({ ...selectedTrip, t_status: "Completed" });
+          alert("Trip completed");
+        } else {
+          alert("Odometer reading submitted");
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting odometer reading:', error);
     }
   };
 
@@ -68,28 +64,57 @@ const TripHistory = () => {
   }
 
   return (
-    <Box padding={2}>
-      {trips.map((trip) => (
-        <Card key={trip.id} variant="outlined" sx={{ marginBottom: 2 }}>
-          <CardContent>
-            <Typography variant="h6">LPO: {trip.lpo}</Typography>
-            <Typography variant="body1">Start: {trip.start}</Typography>
-            <Typography variant="body1">Destination: {trip.destination}</Typography>
-            <Typography variant="body2">Date: {new Date(trip.date).toLocaleDateString()}</Typography>
-            <Typography variant="body2">Status: {trip.status}</Typography>
-            {trip.status === 'Pending' && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleStartTrip(trip.id)}
-                sx={{ marginTop: 2 }}
-              >
-                Start Trip
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+    <Box>
+      <Typography variant="h4">Trip History</Typography>
+      <Grid container spacing={3}>
+        {tripList.map((trip) => (
+          <Grid item key={trip.id} xs={12} sm={6} md={4}>
+            <Card onClick={() => handleSelectTrip(trip)}>
+              <CardContent>
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item>
+                    <img src={Asset_icon} alt="Custom Icon" className="icon" />
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="body1">LPO: {trip.t_type}</Typography>
+                    <Typography variant="body1">Destination: {trip.t_operator_id}</Typography>
+                    <Typography variant="body2">Truck: {trip.a_license_plate}</Typography>
+                    <Typography variant="body2">Status: {trip.t_status}</Typography>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {selectedTrip && selectedTrip.t_status === "In-progress" && (
+        <Box mt={2}>
+          <Typography variant="h6">Selected Trip: {selectedTrip.t_type}</Typography>
+
+          {/* Odometer submission and trip completion functionality */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => console.log('Odometer image:', e.target.files[0])}
+            capture="camera"
+          />
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => handleSubmitOdometer(selectedTrip.id, false)}
+          >
+            Submit Odometer Reading
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleSubmitOdometer(selectedTrip.id, true)}
+          >
+            Complete Trip
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };
