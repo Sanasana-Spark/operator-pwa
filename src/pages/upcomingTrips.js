@@ -12,6 +12,7 @@ const UpcomingTrips = () => {
   const [fuelRequested, setFuelRequested] = useState(false);
   const navigate = useNavigate();
 
+  // Fetch trips and check if there's any trip in progress
   useEffect(() => {
     const apiUrl = `${baseURL}/trips`;
     fetch(apiUrl)
@@ -22,8 +23,10 @@ const UpcomingTrips = () => {
         return response.json();
       })
       .then((data) => {
-        setTrips(data);
-        setLoading(false);
+        const inProgress = data.find(trip => trip.t_status === 'In-progress');
+        setInProgressTrip(inProgress); // Set in-progress trip if it exists
+        setTrips(data); // Set all trips
+        setLoading(false); // Loading is complete
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -31,6 +34,7 @@ const UpcomingTrips = () => {
       });
   }, [baseURL]);
 
+  // Handle starting a trip
   const handleStartTrip = (tripId) => {
     if (fuelRequested) {
       if (window.confirm("Are you sure you want to start this trip?")) {
@@ -60,8 +64,9 @@ const UpcomingTrips = () => {
     }
   };
 
+  // Handle successful fuel request
   const handleFuelRequestSuccess = () => {
-    setFuelRequested(true);
+    setFuelRequested(true); // Set fuel requested state to true
   };
 
   if (loading) {
@@ -77,14 +82,19 @@ const UpcomingTrips = () => {
       {!inProgressTrip && trips.map((trip) => (
         <Card key={trip.id} variant="outlined" sx={{ marginBottom: 2 }}>
           <CardContent>
-          <Typography variant="h6">LPO: {trip.t_type}</Typography>
+            <Typography variant="h6">LPO: {trip.t_type}</Typography>
             <Typography variant="body1">Start: {trip.t_origin_place_query}</Typography>
             <Typography variant="body1">Destination: {trip.t_destination_place_query}</Typography>
             <Typography variant="body2">Date: {new Date(trip.t_start_date).toLocaleDateString()}</Typography>
             <Typography variant="body2">Status: {trip.t_status}</Typography>
-            {trip.status === 'Pending' && (
+
+            {/* Check if the trip is pending, and the driver has no trip in progress */}
+            {trip.t_status === 'Pending' && !inProgressTrip && (
               <>
+                {/* Render the RequestFuel component with the trip and baseURL as props */}
                 <RequestFuel trip={trip} baseURL={baseURL} onFuelRequestSuccess={handleFuelRequestSuccess} />
+                
+                {/* Start Trip button - Enabled only after fuel is requested */}
                 <Button
                   variant="contained"
                   color="primary"
@@ -100,16 +110,17 @@ const UpcomingTrips = () => {
         </Card>
       ))}
 
+      {/* If there is an in-progress trip, display it */}
       {inProgressTrip && (
         <Box>
           <Card variant="outlined" sx={{ marginBottom: 2 }}>
             <CardContent>
               <Typography variant="h6">Trip Details</Typography>
-              <Typography variant="body1">LPO: {inProgressTrip.lpo}</Typography>
-              <Typography variant="body1">Start: {inProgressTrip.start}</Typography>
-              <Typography variant="body1">Destination: {inProgressTrip.destination}</Typography>
-              <Typography variant="body2">Date: {new Date(inProgressTrip.date).toLocaleDateString()}</Typography>
-              <Typography variant="body2">Status: {inProgressTrip.status}</Typography>
+              <Typography variant="body1">LPO: {inProgressTrip.t_type}</Typography>
+              <Typography variant="body1">Start: {inProgressTrip.t_origin_place_query}</Typography>
+              <Typography variant="body1">Destination: {inProgressTrip.t_destination_place_query}</Typography>
+              <Typography variant="body2">Date: {new Date(inProgressTrip.t_start_date).toLocaleDateString()}</Typography>
+              <Typography variant="body2">Status: {inProgressTrip.t_status}</Typography>
             </CardContent>
           </Card>
         </Box>
