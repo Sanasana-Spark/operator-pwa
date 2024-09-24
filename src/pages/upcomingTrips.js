@@ -1,131 +1,128 @@
-/* eslint-disable no-undef */
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Button, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import RequestFuel from '../components/request-fuel/requestFuel'; // Import the RequestFuel component
 
 const UpcomingTrips = () => {
-  const baseURL = process.env.REACT_APP_BASE_URL;
-  const [trips, setTrips] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedTrip, setSelectedTrip] = useState(null); // State for the selected trip
-  const [fuelRequested, setFuelRequested] = useState({}); // Track fuel request status per trip
-  const navigate = useNavigate();
+    const [trips, setTrips] = useState([]);
+    const [fuelRequested, setFuelRequested] = useState(false);
+    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [userId, setUserId] = useState(''); // Local state for userId
+    const [orgId, setOrgId] = useState(''); // Local state for orgId
+    const baseURL = 'https://your-api-url.com'; // Replace with your actual base URL
 
-  useEffect(() => {
-    const apiUrl = `${baseURL}/trips`;
-    fetch(apiUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setTrips(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      });
-  }, [baseURL]);
+    // Simulate fetching user data
+    useEffect(() => {
+        // Example: set userId and orgId
+        setUserId('exampleUserId'); // Replace with actual logic to get userId
+        setOrgId('exampleOrgId'); // Replace with actual logic to get orgId
+    }, []);
 
-  const handleTripClick = (trip) => {
-    setSelectedTrip(trip);
-    setFuelRequested(fuelRequested[trip.id] || false); // Update fuel request status for selected trip
-  };
-
-  const handleStartTrip = () => {
-    if (fuelRequested) {
-      if (window.confirm("Are you sure you want to start this trip?")) {
-        fetch(`${baseURL}/trips/${selectedTrip.id}/status`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status: 'In-progress' }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error('Failed to update trip status');
+    // Fetch upcoming trips
+    useEffect(() => {
+        const fetchTrips = async () => {
+            try {
+                const response = await fetch(`${baseURL}/trips/upcoming`);
+                const data = await response.json();
+                setTrips(data);
+            } catch (error) {
+                console.error('Error fetching trips:', error);
             }
-            return response.json();
-          })
-          .then((updatedTrip) => {
-            setSelectedTrip(updatedTrip); // Set the in-progress trip to state
-            navigate('/drive'); // Navigate to /drive route
-          })
-          .catch((error) => {
-            console.error('Error updating trip status:', error);
-          });
-      }
-    } else {
-      alert("You must request fuel before starting the trip.");
-    }
-  };
+        };
+        fetchTrips();
+    }, [baseURL]);
 
-  const handleFuelRequestSuccess = (tripId) => {
-    setFuelRequested((prev) => ({ ...prev, [tripId]: true }));
-  };
+    const handleRequestFuel = async (tripId) => {
+        try {
+            const response = await fetch(`${baseURL}/fuel/request`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tripId,
+                    userId, // Use local state for userId
+                    orgId,  // Use local state for orgId
+                }),
+            });
 
-  if (loading) {
+            if (response.ok) {
+                // Update trip status after successful fuel request
+                setTrips((prevTrips) =>
+                    prevTrips.map((trip) =>
+                        trip.id === tripId ? { ...trip, status: 'requested' } : trip
+                    )
+                );
+                setFuelRequested(false); // Close the modal
+            } else {
+                console.error('Error requesting fuel:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error requesting fuel:', error);
+        }
+    };
+
+    const handleOpenModal = (trip) => {
+        setSelectedTrip(trip);
+        setFuelRequested(true);
+    };
+
+    const handleCloseModal = () => {
+        setFuelRequested(false);
+        setSelectedTrip(null);
+    };
+
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
+        <>
+            <h1>Upcoming Trips</h1>
+            <ul>
+                {trips.map((trip) => (
+                    <li key={trip.id}>
+                        <div>
+                            <p>Destination: {trip.destination}</p>
+                            <p>Status: {trip.status}</p>
+                            {trip.status === 'in_progress' && (
+                                <button onClick={() => handleOpenModal(trip)}>Request Fuel</button>
+                            )}
+                        </div>
+                    </li>
+                ))}
+            </ul>
 
-  return (
-    <Box padding={2}>
-      {trips.map((trip) => (
-        <Card key={trip.id} variant="outlined" sx={{ marginBottom: 2 }} onClick={() => handleTripClick(trip)}>
-          <CardContent>
-            <Typography variant="h6">LPO: {trip.t_type}</Typography>
-            <Typography variant="body1">Start: {trip.t_origin_place_query}</Typography>
-            <Typography variant="body1">Destination: {trip.t_destination_place_query}</Typography>
-            <Typography variant="body2">Date: {new Date(trip.t_start_date).toLocaleDateString()}</Typography>
-            <Typography variant="body2">Status: {trip.t_status}</Typography>
-            {selectedTrip && selectedTrip.id === trip.id && trip.t_status === 'In-progress' && (
-              <>
-                <RequestFuel
-                  open={selectedTrip.id === trip.id}
-                  trip={trip}
-                  baseURL={baseURL}
-                  onCloseModal={() => setSelectedTrip(null)} // Close modal when odometer reading is submitted
-                  setFuelRequested={handleFuelRequestSuccess}
-                />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleStartTrip}
-                  sx={{ marginTop: 2 }}
-                >
-                  Start Trip
-                </Button>
-              </>
+            {/* Modal for Fuel Request */}
+            {fuelRequested && selectedTrip && (
+                <div style={modalStyles.overlay}>
+                    <div style={modalStyles.modal}>
+                        <h2>Request Fuel</h2>
+                        <p>Trip ID: {selectedTrip.id}</p>
+                        <p>Destination: {selectedTrip.destination}</p>
+                        <p>Status: {selectedTrip.status}</p>
+                        <button onClick={() => handleRequestFuel(selectedTrip.id)}>Confirm Request</button>
+                        <button onClick={handleCloseModal}>Cancel</button>
+                    </div>
+                </div>
             )}
-          </CardContent>
-        </Card>
-      ))}
+        </>
+    );
+};
 
-      {selectedTrip && (
-        <Box>
-          <Card variant="outlined" sx={{ marginBottom: 2 }}>
-            <CardContent>
-              <Typography variant="h6">Trip Details</Typography>
-              <Typography variant="body1">LPO: {selectedTrip.t_type}</Typography>
-              <Typography variant="body1">Start: {selectedTrip.t_origin_place_query}</Typography>
-              <Typography variant="body1">Destination: {selectedTrip.t_destination_place_query}</Typography>
-              <Typography variant="body2">Date: {new Date(selectedTrip.t_start_date).toLocaleDateString()}</Typography>
-              <Typography variant="body2">Status: {selectedTrip.t_status}</Typography>
-            </CardContent>
-          </Card>
-        </Box>
-      )}
-    </Box>
-  );
+// Simple styles for the modal
+const modalStyles = {
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modal: {
+        backgroundColor: 'white',
+        padding: '20px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+        textAlign: 'center',
+    },
 };
 
 export default UpcomingTrips;
