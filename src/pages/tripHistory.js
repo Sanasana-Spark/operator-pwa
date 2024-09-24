@@ -9,6 +9,7 @@ const TripHistory = () => {
   const [loading, setLoading] = useState(true);
   const [tripList, setTripList] = useState([]);
   const [selectedTrip, setSelectedTrip] = useState(null);
+  const [odometerImage, setOdometerImage] = useState(null); // For storing captured image
 
   useEffect(() => {
     const apiUrl = `${baseURL}/trips?userEmail=${userEmail}`;
@@ -34,12 +35,27 @@ const TripHistory = () => {
     setSelectedTrip(trip);
   };
 
+  const handleCaptureImage = (e) => {
+    const file = e.target.files[0];
+    setOdometerImage(file); // Store the captured image file
+    console.log("Captured image:", file);
+  };
+
   const handleSubmitOdometer = async (tripId, isComplete) => {
+    if (!odometerImage) {
+      alert("Please capture the odometer image before submitting.");
+      return;
+    }
+
     try {
+      const formData = new FormData();
+      formData.append("odometerImage", odometerImage);
+      formData.append("tripId", tripId);
+      formData.append("isComplete", isComplete);
+
       const response = await fetch(`${baseURL}/trips/${tripId}/odometer`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tripId, isComplete }),
+        body: formData, // Send image as part of form data
       });
 
       if (response.ok) {
@@ -92,13 +108,15 @@ const TripHistory = () => {
         <Box mt={2}>
           <Typography variant="h6">Selected Trip: {selectedTrip.t_type}</Typography>
 
-          {/* Odometer submission and trip completion functionality */}
+          {/* Camera capture input for capturing odometer image */}
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => console.log('Odometer image:', e.target.files[0])}
-            capture="camera"
+            capture="environment"
+            onChange={handleCaptureImage}
           />
+
+          {/* Submit Odometer and Complete Trip buttons */}
           <Button
             variant="contained"
             color="secondary"
