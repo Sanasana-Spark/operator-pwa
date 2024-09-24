@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Map from "../components/maps/singleTripMap";
-import { Button, Box, Typography, Card, CardContent, Grid, CircularProgress } from "@mui/material";
-import RequestFuel from "../components/request-fuel/requestFuel";
+import { Box, Typography, Card, CardContent, Grid, CircularProgress, Button } from "@mui/material";
 import { useAuthContext } from "../components/onboarding/authProvider";
 import Asset_icon from '../assets/asset_icon.png';
 
@@ -10,12 +9,9 @@ const DriverHome = () => {
   const { userId, org_id, userEmail } = useAuthContext();
   const [loading, setLoading] = useState(true);
   const [inProgressTrip, setInProgressTrip] = useState(null);
-  const [inProgressTripId, setInProgressTripId] = useState(null);
+  const [trips, setTrips] = useState([]);
   const [startPoint, setStartPoint] = useState({ lat: 5.66667, lng: 0.0 });
   const [endPoint, setEndPoint] = useState({ lat: 5.66667, lng: 0.0 });
-  const [fuelRequested, setFuelRequested] = useState(false);
-  const [requestFuelOpen, setRequestFuelOpen] = useState(false);
-  const [fuelAllocated, setFuelAllocated] = useState(null);
 
   useEffect(() => {
     const apiUrl = `${baseURL}/trips?userEmail=${userEmail}`;
@@ -29,11 +25,10 @@ const DriverHome = () => {
       })
       .then((data) => {
         setLoading(false);
-
+        setTrips(data);
         const inProgressTrip = data.find((trip) => trip.t_status === "In-progress");
         if (inProgressTrip) {
           setInProgressTrip(inProgressTrip);
-          setInProgressTripId(inProgressTrip.id);
           setStartPoint({ lat: parseFloat(inProgressTrip.t_start_lat), lng: parseFloat(inProgressTrip.t_start_long) });
           setEndPoint({ lat: parseFloat(inProgressTrip.t_end_lat), lng: parseFloat(inProgressTrip.t_end_long) });
         }
@@ -44,44 +39,53 @@ const DriverHome = () => {
       });
   }, [baseURL, userEmail]);
 
-  const handleRequestFuel = (capturedImageFile) => {
-    if (inProgressTripId) {
-      const formData = new FormData();
-      formData.append('f_created_by', userId);
-      formData.append('f_organization_id', org_id);
-      formData.append('f_operator_id', inProgressTrip.t_operator_id);
-      formData.append('f_asset_id', inProgressTrip.t_asset_id);
-      formData.append('f_trip_id', inProgressTripId);
-      formData.append('f_odometer_image', capturedImageFile);
+  const handleStartTrip = async (tripId) => {
+    try {
+      const response = await fetch(`${baseURL}/trips/${tripId}/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId }),
+      });
 
-      return fetch(`${baseURL}/fuel/create`, {
-        method: "POST",
-        body: formData,
-      })
-        .then((response) => {
-          if (!response.ok) {
-            return response.json().then((errorData) => {
-              throw new Error("Backend error: " + (errorData.message || "Unknown error"));
-            });
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setFuelAllocated(data.fuel_allocated);  // Store fuel allocated response
-          return data; // Return the data to handle in the component
-        })
-        .catch((error) => {
-          console.error("Error submitting fuel request:", error);
-          throw error; // Rethrow error to be handled in component
-        });
-    } else {
-      console.error("No in-progress trip found.");
-      return Promise.reject(new Error("No in-progress trip found."));
+      if (response.ok) {
+        const updatedTrip = trips.find(trip => trip.id === tripId);
+        setInProgressTrip({ ...updatedTrip, t_status: 'In-progress' });
+      }
+    } catch (error) {
+      console.error('Error starting trip:', error);
     }
   };
 
-  const handleOpenRequestFuel = () => setRequestFuelOpen(true);
-  const handleCloseRequestFuel = () => setRequestFuelOpen(false);
+  const handleSubmitOdometer = async (tripId, isComplete) => {
+    // Here is where you would handle uploading the odometer image to your backend
+    try {
+      const response = await fetch(`${baseURL}/trips/${tripId}/odometer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId, isComplete }),
+      });
+
+      if (response.ok) {
+        if (isComplete) {
+          setInProgressTrip(null); // The trip is now complete
+        } else {
+          alert('Odometer reading submitted');
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting odometer reading:', error);
+    }
+  };
+
+  const handleOdometerCapture = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // This is where you handle the odometer image submission (can be uploaded to backend)
+      console.log('Odometer image captured:', file);
+    }
+  };
+
+  const canStartTrip = trips.some(trip => trip.t_status === 'Fuel Requested' && !inProgressTrip);
 
   if (loading) {
     return (
@@ -110,63 +114,43 @@ const DriverHome = () => {
               </Grid>
             </CardContent>
           </Card>
-          {!fuelRequested ? (
-            <Button
-              onClick={handleOpenRequestFuel}
-              sx={{
-                position: 'absolute',
-                bottom: 80,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                backgroundColor: '#01947A',
-                color: 'white',
-                boxShadow: 3,
-                '&:hover': {
-                  backgroundColor: '#047A9A',
-                },
-              }}
-            >
-              Request Fuel
-            </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                // Implement start trip functionality here if needed
-              }}
-              sx={{
-                position: 'absolute',
-                bottom: 80,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                backgroundColor: '#01947A',
-                color: 'white',
-                boxShadow: 3,
-                '&:hover': {
-                  backgroundColor: '#047A9A',
-                },
-              }}
-            >
-              Start Trip
-            </Button>
-          )}
-          <RequestFuel
-            open={requestFuelOpen}
-            onSubmit={handleRequestFuel}
-            onCancel={handleCloseRequestFuel}
-            inProgressTripId={inProgressTripId}
-            userId={userId}
-            org_id={org_id}
-            inProgressTrip={inProgressTrip}
-            baseURL={baseURL}
-            setFuelRequested={setFuelRequested}
-            setFuelAllocated={setFuelAllocated}
-            fuelAllocated={fuelAllocated}
+          
+          {/* Odometer submission and trip completion functionality */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleOdometerCapture}
+            capture="camera"
           />
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => handleSubmitOdometer(inProgressTrip.id, false)}
+          >
+            Submit Odometer Reading
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleSubmitOdometer(inProgressTrip.id, true)}
+          >
+            Complete Trip
+          </Button>
         </Box>
+      )}
+
+      {/* Start trip button */}
+      {!inProgressTrip && canStartTrip && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleStartTrip(trips.find(trip => trip.t_status === 'Fuel Requested').id)}
+        >
+          Start Trip
+        </Button>
       )}
     </>
   );
 };
 
 export default DriverHome;
- 
