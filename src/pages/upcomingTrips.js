@@ -4,16 +4,7 @@ const UpcomingTrips = () => {
     const [trips, setTrips] = useState([]);
     const [fuelRequested, setFuelRequested] = useState(false);
     const [selectedTrip, setSelectedTrip] = useState(null);
-    const [userId, setUserId] = useState(''); // Local state for userId
-    const [orgId, setOrgId] = useState(''); // Local state for orgId
     const baseURL = 'https://your-api-url.com'; // Replace with your actual base URL
-
-    // Simulate fetching user data
-    useEffect(() => {
-        // Example: set userId and orgId
-        setUserId('exampleUserId'); // Replace with actual logic to get userId
-        setOrgId('exampleOrgId'); // Replace with actual logic to get orgId
-    }, []);
 
     // Fetch upcoming trips
     useEffect(() => {
@@ -38,8 +29,6 @@ const UpcomingTrips = () => {
                 },
                 body: JSON.stringify({
                     tripId,
-                    userId, // Use local state for userId
-                    orgId,  // Use local state for orgId
                 }),
             });
 
@@ -51,6 +40,7 @@ const UpcomingTrips = () => {
                     )
                 );
                 setFuelRequested(false); // Close the modal
+                setSelectedTrip(null); // Reset selected trip
             } else {
                 console.error('Error requesting fuel:', response.statusText);
             }
@@ -64,11 +54,6 @@ const UpcomingTrips = () => {
         setFuelRequested(true);
     };
 
-    const handleCloseModal = () => {
-        setFuelRequested(false);
-        setSelectedTrip(null);
-    };
-
     return (
         <>
             <h1>Upcoming Trips</h1>
@@ -79,50 +64,24 @@ const UpcomingTrips = () => {
                             <p>Destination: {trip.destination}</p>
                             <p>Status: {trip.status}</p>
                             {trip.status === 'in_progress' && (
-                                <button onClick={() => handleOpenModal(trip)}>Request Fuel</button>
+                                <button onClick={() => handleOpenModal(trip)}>View Trip Details</button>
                             )}
                         </div>
                     </li>
                 ))}
             </ul>
 
-            {/* Modal for Fuel Request */}
-            {fuelRequested && selectedTrip && (
-                <div style={modalStyles.overlay}>
-                    <div style={modalStyles.modal}>
-                        <h2>Request Fuel</h2>
-                        <p>Trip ID: {selectedTrip.id}</p>
-                        <p>Destination: {selectedTrip.destination}</p>
-                        <p>Status: {selectedTrip.status}</p>
-                        <button onClick={() => handleRequestFuel(selectedTrip.id)}>Confirm Request</button>
-                        <button onClick={handleCloseModal}>Cancel</button>
-                    </div>
+            {/* Fuel Request Modal */}
+            {selectedTrip && fuelRequested && (
+                <div className="modal">
+                    <h2>Request Fuel for {selectedTrip.destination}</h2>
+                    <p>Trip ID: {selectedTrip.id}</p>
+                    <button onClick={() => handleRequestFuel(selectedTrip.id)}>Confirm Request</button>
+                    <button onClick={() => setFuelRequested(false)}>Cancel</button>
                 </div>
             )}
         </>
     );
-};
-
-// Simple styles for the modal
-const modalStyles = {
-    overlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modal: {
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-        textAlign: 'center',
-    },
 };
 
 export default UpcomingTrips;
