@@ -1,10 +1,10 @@
-/* eslint-disable no-undef */
+
+// src/components/UpcomingTrips.js
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Button, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import RequestFuel from '../components/request-fuel/requestFuel'; // Import the RequestFuel component
+import { Modal, Box, Typography, Button } from '@mui/material';
 
 const UpcomingTrips = () => {
+
   const baseURL = process.env.REACT_APP_BASE_URL;
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,6 +127,7 @@ const UpcomingTrips = () => {
       )}
     </Box>
   );
+
 };
 
 export default UpcomingTrips;
