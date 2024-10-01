@@ -8,7 +8,8 @@ const UpcomingTrips = () => {
     const [fuelRequested, setFuelRequested] = useState(false);
     const [selectedTrip, setSelectedTrip] = useState(null);
     const [odometerImage, setOdometerImage] = useState(null);
-    const baseURL = 'https://your-api-url.com'; // Replace with your actual base URL
+    const baseURL = process.env.REACT_APP_BASE_URL;
+
 
     // Fetch upcoming trips
     useEffect(() => {
