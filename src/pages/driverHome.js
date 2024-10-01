@@ -6,7 +6,7 @@ import Asset_icon from '../assets/asset_icon.png';
 
 const DriverHome = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const { userId, org_id, userEmail } = useAuthContext();
+  const {  userEmail } = useAuthContext();
   const [loading, setLoading] = useState(true);
   const [inProgressTrip, setInProgressTrip] = useState(null);
   const [startPoint, setStartPoint] = useState({ lat: 5.66667, lng: 0.0 });

@@ -1,17 +1,18 @@
 import React, { useState, useRef } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Box, CircularProgress } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, CircularProgress } from "@mui/material";
+import { useAuthContext } from "../onboarding/authProvider";
 
 const RequestFuel = ({
   open,
   onCancel,
   inProgressTripId,
-  userId,
-  org_id,
   inProgressTrip,
-  baseURL,
   setFuelRequested,
   onCloseModal // Handler to close the modal
 }) => {
+
+  const baseURL = process.env.REACT_APP_BASE_URL;
+  const {  userId,org_id } = useAuthContext();
   const [capturedImage, setCapturedImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,8 +28,6 @@ const RequestFuel = ({
       const formData = new FormData();
       formData.append('f_created_by', userId);
       formData.append('f_organization_id', org_id);
-      formData.append('f_operator_id', inProgressTrip.t_operator_id);
-      formData.append('f_asset_id', inProgressTrip.t_asset_id);
       formData.append('f_trip_id', inProgressTripId);
       formData.append('f_odometer_image', capturedImage);
 
