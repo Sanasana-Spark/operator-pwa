@@ -9,7 +9,7 @@ const Layout = ({ children }) => {
 <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <TopBar />
        
-        <main style={{ flexGrow: 1, padding: '10px' }}>{children}</main>
+        <main style={{ flexGrow: 1, paddingTop: '100px' }}>{children}</main>
         <BottomBar />
 
     </div>
