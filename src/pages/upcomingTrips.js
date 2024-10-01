@@ -4,248 +4,130 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, Button } from '@mui/material';
 
 const UpcomingTrips = () => {
-    const [trips, setTrips] = useState([]);
-    const [fuelRequested, setFuelRequested] = useState(false);
-    const [selectedTrip, setSelectedTrip] = useState(null);
-    const [odometerImage, setOdometerImage] = useState(null);
-    const baseURL = process.env.REACT_APP_BASE_URL;
 
+  const baseURL = process.env.REACT_APP_BASE_URL;
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [inProgressTrip, setInProgressTrip] = useState(null);
+  const [fuelRequested, setFuelRequested] = useState(false);
+  const navigate = useNavigate();
 
-    // Fetch upcoming trips
-    useEffect(() => {
-        const fetchTrips = async () => {
-            try {
-                const response = await fetch(`${baseURL}/trips/upcoming`);
-                const data = await response.json();
-                setTrips(data);
-            } catch (error) {
-                console.error('Error fetching trips:', error);
+  // Fetch trips and check if there's any trip in progress
+  useEffect(() => {
+    const apiUrl = `${baseURL}/trips`;
+    fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const inProgress = data.find(trip => trip.t_status === 'In-progress');
+        setInProgressTrip(inProgress); // Set in-progress trip if it exists
+        setTrips(data); // Set all trips
+        setLoading(false); // Loading is complete
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      });
+  }, [baseURL]);
+
+  // Handle starting a trip
+  const handleStartTrip = (tripId) => {
+    if (fuelRequested) {
+      if (window.confirm("Are you sure you want to start this trip?")) {
+        fetch(`${baseURL}/trips/${tripId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: 'In-progress' }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Failed to update trip status');
             }
-        };
-        fetchTrips();
-    }, [baseURL]);
+            return response.json();
+          })
+          .then((updatedTrip) => {
+            setInProgressTrip(updatedTrip); // Set the in-progress trip to state
+            navigate('/drive'); // Navigate to /drive route
+          })
+          .catch((error) => {
+            console.error('Error updating trip status:', error);
+          });
+      }
+    } else {
+      alert("You must request fuel before starting the trip.");
+    }
+  };
 
-    const handleStartTrip = async (tripId) => {
-        try {
-            const response = await fetch(`${baseURL}/trips/start`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ tripId }),
-            });
+  // Handle successful fuel request
+  const handleFuelRequestSuccess = () => {
+    setFuelRequested(true); // Set fuel requested state to true
+  };
 
-            if (response.ok) {
-                setTrips((prevTrips) =>
-                    prevTrips.map((trip) =>
-                        trip.id === tripId ? { ...trip, status: 'in_progress' } : trip
-                    )
-                );
-            } else {
-                console.error('Error starting trip:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error starting trip:', error);
-        }
-    };
-
-    const handleCompleteTrip = async (tripId) => {
-        try {
-            const response = await fetch(`${baseURL}/trips/complete`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ tripId }),
-            });
-
-            if (response.ok) {
-                setTrips((prevTrips) =>
-                    prevTrips.map((trip) =>
-                        trip.id === tripId ? { ...trip, status: 'completed' } : trip
-                    )
-                );
-            } else {
-                console.error('Error completing trip:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error completing trip:', error);
-        }
-    };
-
-    const handleRequestFuel = async (tripId) => {
-        if (!odometerImage) {
-            alert('Please capture the odometer image before requesting fuel.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('tripId', tripId);
-        formData.append('odometerImage', odometerImage);
-
-        try {
-            const response = await fetch(`${baseURL}/fuel/request`, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                setTrips((prevTrips) =>
-                    prevTrips.map((trip) =>
-                        trip.id === tripId ? { ...trip, fuelRequested: true } : trip
-                    )
-                );
-                setFuelRequested(false);
-                setSelectedTrip(null);
-                setOdometerImage(null);
-            } else {
-                console.error('Error requesting fuel:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error requesting fuel:', error);
-        }
-    };
-
-    const handleOpenModal = (trip) => {
-        setSelectedTrip(trip);
-        setFuelRequested(true);
-        setOdometerImage(null);
-    };
-
-    const handleCloseModal = () => {
-        setFuelRequested(false);
-        setSelectedTrip(null);
-        setOdometerImage(null);
-    };
-
-    const handleCaptureImage = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setOdometerImage(file);
-        }
-    };
-
-    const handleSubmitOdometerReading = async (tripId) => {
-        if (!odometerImage) {
-            alert('Please capture the odometer image before submitting.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('tripId', tripId);
-        formData.append('odometerImage', odometerImage);
-
-        try {
-            const response = await fetch(`${baseURL}/odometer/submit`, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                setTrips((prevTrips) =>
-                    prevTrips.map((trip) =>
-                        trip.id === tripId ? { ...trip, lastOdometerReading: odometerImage } : trip
-                    )
-                );
-                setOdometerImage(null);
-            } else {
-                console.error('Error submitting odometer reading:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error submitting odometer reading:', error);
-        }
-    };
-
+  if (loading) {
     return (
-        <>
-            <h1>Upcoming Trips</h1>
-            <ul>
-                {trips.map((trip) => (
-                    <li key={trip.id}>
-                        <div>
-                            <p>Destination: {trip.destination}</p>
-                            <p>Status: {trip.status}</p>
-                            {trip.status === 'pending' && (
-                                <Button variant="contained" onClick={() => handleStartTrip(trip.id)}>Start Trip</Button>
-                            )}
-                            {trip.status === 'in_progress' && (
-                                <>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleCaptureImage}
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        onClick={() => handleSubmitOdometerReading(trip.id)}
-                                        disabled={!odometerImage}
-                                    >
-                                        Submit Odometer Reading
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        color="secondary"
-                                        onClick={() => handleCompleteTrip(trip.id)}
-                                    >
-                                        Complete Trip
-                                    </Button>
-                                </>
-                            )}
-                            {trip.fuelRequested === false && trip.status !== 'in_progress' && (
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => handleOpenModal(trip)}
-                                >
-                                    Request Fuel
-                                </Button>
-                            )}
-                        </div>
-                    </li>
-                ))}
-            </ul>
-
-            {/* Fuel Request Modal */}
-            {selectedTrip && fuelRequested && (
-                <Modal open={fuelRequested} onClose={handleCloseModal}>
-                    <Box
-                        sx={{
-                            padding: 2,
-                            backgroundColor: 'white',
-                            borderRadius: 2,
-                            boxShadow: 3,
-                            maxWidth: 400,
-                            margin: 'auto',
-                            marginTop: '20%',
-                        }}
-                    >
-                        <Typography variant="h6">Request Fuel for {selectedTrip.destination}</Typography>
-                        <Typography variant="body1">Trip ID: {selectedTrip.id}</Typography>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleCaptureImage}
-                        />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleRequestFuel(selectedTrip.id)}
-                            sx={{ marginTop: 2 }}
-                        >
-                            Confirm Request
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            color="secondary"
-                            onClick={handleCloseModal}
-                            sx={{ marginTop: 2, marginLeft: 1 }}
-                        >
-                            Cancel
-                        </Button>
-                    </Box>
-                </Modal>
-            )}
-        </>
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
     );
+  }
+
+  return (
+    <Box padding={2}>
+      {!inProgressTrip && trips.map((trip) => (
+        <Card key={trip.id} variant="outlined" sx={{ marginBottom: 2 }}>
+          <CardContent>
+            <Typography variant="h6">LPO: {trip.t_type}</Typography>
+            <Typography variant="body1">Start: {trip.t_origin_place_query}</Typography>
+            <Typography variant="body1">Destination: {trip.t_destination_place_query}</Typography>
+            <Typography variant="body2">Date: {new Date(trip.t_start_date).toLocaleDateString()}</Typography>
+            <Typography variant="body2">Status: {trip.t_status}</Typography>
+
+            {/* Check if the trip is pending, and the driver has no trip in progress */}
+            {trip.t_status === 'Pending' && !inProgressTrip && (
+              <>
+                {/* Render the RequestFuel component with the trip and baseURL as props */}
+                <RequestFuel trip={trip} baseURL={baseURL} onFuelRequestSuccess={handleFuelRequestSuccess} />
+                
+                {/* Start Trip button - Enabled only after fuel is requested */}
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleStartTrip(trip.id)}
+                  sx={{ marginTop: 2 }}
+                  disabled={!fuelRequested} // Disable Start Trip button until fuel is requested
+                >
+                  Start Trip
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+
+      {/* If there is an in-progress trip, display it */}
+      {inProgressTrip && (
+        <Box>
+          <Card variant="outlined" sx={{ marginBottom: 2 }}>
+            <CardContent>
+              <Typography variant="h6">Trip Details</Typography>
+              <Typography variant="body1">LPO: {inProgressTrip.t_type}</Typography>
+              <Typography variant="body1">Start: {inProgressTrip.t_origin_place_query}</Typography>
+              <Typography variant="body1">Destination: {inProgressTrip.t_destination_place_query}</Typography>
+              <Typography variant="body2">Date: {new Date(inProgressTrip.t_start_date).toLocaleDateString()}</Typography>
+              <Typography variant="body2">Status: {inProgressTrip.t_status}</Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      )}
+    </Box>
+  );
+
 };
 
 export default UpcomingTrips;
