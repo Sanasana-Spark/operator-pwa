@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from "react";
 import Map from "../components/maps/singleTripMap";
-import { Box, Typography, Card, CardContent, Grid, CircularProgress } from "@mui/material";
+import { Box, Typography, Card, CardContent, Grid, CircularProgress, Button } from "@mui/material";
 import { useAuthContext } from "../components/onboarding/authProvider";
 import Asset_icon from '../assets/asset_icon.png';
 
 const DriverHome = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const {  userEmail } = useAuthContext();
+  const { org_id, userId } = useAuthContext(); // Extract org_id and userId
   const [loading, setLoading] = useState(true);
   const [inProgressTrip, setInProgressTrip] = useState(null);
   const [startPoint, setStartPoint] = useState({ lat: 5.66667, lng: 0.0 });
   const [endPoint, setEndPoint] = useState({ lat: 5.66667, lng: 0.0 });
 
   useEffect(() => {
-    const apiUrl = `${baseURL}/trips?userEmail=${userEmail}`;
+    // Construct the API URL using org_id and userId
+    const apiUrl = `${baseURL}/trips/${org_id}/${userId}`;
 
     fetch(apiUrl)
       .then((response) => {
@@ -36,7 +37,27 @@ const DriverHome = () => {
         console.error("Error fetching data:", error);
         setLoading(false);
       });
-  }, [baseURL, userEmail]);
+  }, [baseURL, org_id, userId]); // Update dependencies to include org_id and userId
+
+  const handleStartTrip = () => {
+    // Logic to start the trip
+    const startTripUrl = `${baseURL}/trips/start/${inProgressTrip.id}`; // Update with the correct URL for starting a trip
+    fetch(startTripUrl, { method: "POST" }) // Assuming starting a trip requires a POST request
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to start the trip");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // Handle successful trip start
+        console.log("Trip started:", data);
+        // Optionally, update the inProgressTrip state or redirect
+      })
+      .catch((error) => {
+        console.error("Error starting trip:", error);
+      });
+  };
 
   if (loading) {
     return (
@@ -63,6 +84,12 @@ const DriverHome = () => {
                   <Typography variant="body2">Truck: {inProgressTrip.a_license_plate}</Typography>
                 </Grid>
               </Grid>
+              {/* Start Trip Button */}
+              <Box mt={2}>
+                <Button variant="contained" color="primary" onClick={handleStartTrip}>
+                  Start Trip
+                </Button>
+              </Box>
             </CardContent>
           </Card>
           {/* You can add other functionality here if needed */}
