@@ -39,37 +39,31 @@ const DriverHome = () => {
       });
   }, [baseURL, org_id, userId]); // Update dependencies to include org_id and userId
 
+
   const handleStartTrip = () => {
-    const startTripUrl = `${baseURL}/trips/${org_id}/${userId}/${inProgressTrip.id}`;
-    const tripPayload = {
+    const url = `${baseURL}/trips/${org_id}/${userId}/${inProgressTrip.id}`;
+    const data = {
       id: inProgressTrip.id,
-      t_status: "In-Progress"
+      t_status: "In-Progress",
     };
-  
-    fetch(startTripUrl, {
-      method: "POST",
+    const options = {
+      method: "POST", // Specify the HTTP method
       headers: {
-        "Content-Type": "application/json", // Set the content type to JSON
+        "Content-Type": "application/json", // Specify the content type of the request body
       },
-      body: JSON.stringify(tripPayload), // Convert payload object to JSON string
-    })
+      body: JSON.stringify(data), // Convert data to JSON string for the request body
+    };
+    fetch(url, options)
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to start the trip");
+          throw new Error("Failed to update trip");
         }
-        return response.json();
-      })
-      .then((data) => {
-        // Handle successful trip start
-        console.log("Trip started:", data);
-        // Optionally, update the inProgressTrip state or redirect
+        console.log("trip updated successfully");
       })
       .catch((error) => {
-        console.error("Error starting trip:", error);
+        console.error("Error updating trip:", error);
       });
   };
-  
-
 
   const handleCompleteTrip = () => {
     const startTripUrl = `${baseURL}/trips/${org_id}/${userId}/${inProgressTrip.id}`;
@@ -114,7 +108,7 @@ const DriverHome = () => {
       {!loading && inProgressTrip && (
         <Box container alignItems="center" spacing={1}>
           <Map startPoint={startPoint} endPoint={endPoint} />
-          
+
           <Card variant="elevation" sx={{ marginTop: 2, marginRight: 3, marginLeft: 3, zIndex: 1, width: "70%", boxShadow: 5 }}>
             <CardContent>
               <Grid container alignItems="center" spacing={2}>
