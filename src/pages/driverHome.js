@@ -26,7 +26,7 @@ const DriverHome = () => {
       .then((data) => {
         setLoading(false);
 
-        const inProgressTrip = data.find((trip) => trip.t_status === "In-progress");
+        const inProgressTrip = data.find((trip) => trip.t_status === "Requested");
         if (inProgressTrip) {
           setInProgressTrip(inProgressTrip);
           setStartPoint({ lat: parseFloat(inProgressTrip.t_start_lat), lng: parseFloat(inProgressTrip.t_start_long) });
@@ -114,6 +114,7 @@ const DriverHome = () => {
       {!loading && inProgressTrip && (
         <Box container alignItems="center" spacing={1}>
           <Map startPoint={startPoint} endPoint={endPoint} />
+          
           <Card variant="elevation" sx={{ marginTop: 2, marginRight: 3, marginLeft: 3, zIndex: 1, width: "70%", boxShadow: 5 }}>
             <CardContent>
               <Grid container alignItems="center" spacing={2}>
@@ -129,7 +130,7 @@ const DriverHome = () => {
               {/* Start Trip Button */}
               <Box mt={2}>
                
-              {inProgressTrip.t_status === "In-progress" ? (
+              {inProgressTrip.t_status === "Requested" ? (
     <Button variant="contained" color="primary" onClick={handleStartTrip}>
       Start Trip
     </Button>
