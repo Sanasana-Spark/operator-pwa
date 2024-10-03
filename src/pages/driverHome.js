@@ -40,9 +40,51 @@ const DriverHome = () => {
   }, [baseURL, org_id, userId]); // Update dependencies to include org_id and userId
 
   const handleStartTrip = () => {
-    // Logic to start the trip
-    const startTripUrl = `${baseURL}/trips/start/${inProgressTrip.id}`; // Update with the correct URL for starting a trip
-    fetch(startTripUrl, { method: "POST" }) // Assuming starting a trip requires a POST request
+    const startTripUrl = `${baseURL}/trips/${org_id}/${userId}/${inProgressTrip.id}`;
+    const tripPayload = {
+      id: inProgressTrip.id,
+      t_status: "In-Progress"
+    };
+  
+    fetch(startTripUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Set the content type to JSON
+      },
+      body: JSON.stringify(tripPayload), // Convert payload object to JSON string
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to start the trip");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // Handle successful trip start
+        console.log("Trip started:", data);
+        // Optionally, update the inProgressTrip state or redirect
+      })
+      .catch((error) => {
+        console.error("Error starting trip:", error);
+      });
+  };
+  
+
+
+  const handleCompleteTrip = () => {
+    const startTripUrl = `${baseURL}/trips/${org_id}/${userId}/${inProgressTrip.id}`;
+    const tripPayload = {
+      id: inProgressTrip.id,
+      t_status: "Completed"
+    };
+  
+    fetch(startTripUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Set the content type to JSON
+      },
+      body: JSON.stringify(tripPayload), // Convert payload object to JSON string
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to start the trip");
@@ -86,9 +128,17 @@ const DriverHome = () => {
               </Grid>
               {/* Start Trip Button */}
               <Box mt={2}>
-                <Button variant="contained" color="primary" onClick={handleStartTrip}>
-                  Start Trip
-                </Button>
+               
+              {inProgressTrip.t_status === "In-progress" ? (
+    <Button variant="contained" color="primary" onClick={handleStartTrip}>
+      Start Trip
+    </Button>
+  ) : (
+    <Button variant="contained" color="primary" onClick={handleCompleteTrip}>
+      Complete Trip
+    </Button>
+  )}
+                
               </Box>
             </CardContent>
           </Card>
