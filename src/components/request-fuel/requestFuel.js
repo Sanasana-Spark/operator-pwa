@@ -26,15 +26,21 @@ const RequestFuel = ({
     if (capturedImage) {
       setLoading(true);
       const formData = new FormData();
+      const data = {
+        f_created_by:userId,
+        f_organization_id:org_id,
+        f_trip_id:inProgressTripId,
+        f_odometer_image:capturedImage
+      }
       formData.append('f_created_by', userId);
       formData.append('f_organization_id', org_id);
       formData.append('f_trip_id', inProgressTripId);
-      formData.append('f_odometer_image', capturedImage);
+      formData.append('f_odometer_image', capturedImage, 'odometer.jpg');
 
       // Request fuel
-      fetch(`${baseURL}/fuel/create`, {
+      fetch(`${baseURL}/fuel/${inProgressTripId}/`, {
         method: "POST",
-        body: formData,
+        body: JSON.stringify(data),
       })
       .then((response) => {
         if (!response.ok) {
