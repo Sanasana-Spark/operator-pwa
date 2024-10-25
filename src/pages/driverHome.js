@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
 import Map from "../components/maps/singleTripMap";
-import { Box, Typography, Card, CardContent, Grid, CircularProgress, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  CircularProgress,
+  Button,
+} from "@mui/material";
 import { useAuthContext } from "../components/onboarding/authProvider";
-import Asset_icon from '../assets/asset_icon.png';
+import Asset_icon from "../assets/asset_icon.png";
 
 const DriverHome = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
@@ -26,11 +34,18 @@ const DriverHome = () => {
       .then((data) => {
         setLoading(false);
 
-        const inProgressTrip = data.find((trip) => trip.t_status === "Requested");
+        const inProgressTrip = data.find(
+          (trip) => trip.t_status === "Requested"
+        );
         if (inProgressTrip) {
           setInProgressTrip(inProgressTrip);
-          setStartPoint({ lat: parseFloat(inProgressTrip.t_start_lat), lng: parseFloat(inProgressTrip.t_start_long) });
-          setEndPoint({ lat: parseFloat(inProgressTrip.t_end_lat), lng: parseFloat(inProgressTrip.t_end_long) });
+          const startLat = parseFloat(inProgressTrip.t_start_lat);
+          const startLong = parseFloat(inProgressTrip.t_start_long);
+          const endLat = parseFloat(inProgressTrip.t_end_lat);
+          const endLong = parseFloat(inProgressTrip.t_end_long);
+
+          setStartPoint({ lat: startLat, lng: startLong });
+          setEndPoint({ lat: endLat, lng: endLong });
         }
       })
       .catch((error) => {
@@ -38,7 +53,7 @@ const DriverHome = () => {
         setLoading(false);
       });
   }, [baseURL, org_id, userId]); // Update dependencies to include org_id and userId
-
+console.log(inProgressTrip)
 
   const handleStartTrip = () => {
     const url = `${baseURL}/trips/${org_id}/${userId}/${inProgressTrip.id}`;
@@ -69,9 +84,9 @@ const DriverHome = () => {
     const startTripUrl = `${baseURL}/trips/${org_id}/${userId}/${inProgressTrip.id}`;
     const tripPayload = {
       id: inProgressTrip.id,
-      t_status: "Completed"
+      t_status: "Completed",
     };
-  
+
     fetch(startTripUrl, {
       method: "POST",
       headers: {
@@ -97,7 +112,12 @@ const DriverHome = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
         <CircularProgress />
       </Box>
     );
@@ -107,36 +127,77 @@ const DriverHome = () => {
     <>
       {!loading && inProgressTrip && (
         <Box container alignItems="center" spacing={1}>
-          <Map startPoint={startPoint} endPoint={endPoint} />
+          <Map origin={startPoint}
+              destination={endPoint}
+              key={inProgressTrip.id}
+              center={startPoint}/>
 
-          <Card variant="elevation" sx={{ marginTop: 2, marginRight: 3, marginLeft: 3, zIndex: 1, width: "70%", boxShadow: 5 }}>
+          <Card
+            variant="elevation"
+            sx={{
+              margin: 3,
+              alignItems: "center",
+              zIndex: 1,
+              width: "70%",
+              boxShadow: 5,
+            }}
+          >
             <CardContent>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item>
                   <img src={Asset_icon} alt="Custom Icon" className="icon" />
                 </Grid>
-                <Grid item>
-                  <Typography variant="body1">LPO: {inProgressTrip.t_type}</Typography>
-                  <Typography variant="body1">Destination: {inProgressTrip.t_operator_id}</Typography>
-                  <Typography variant="body2">Truck: {inProgressTrip.a_license_plate}</Typography>
+                <Grid alignItems="right" >
+                  <Typography variant="body2">
+                    LPO: {inProgressTrip.id} {inProgressTrip.t_type}
+                  </Typography>
+                  <Typography variant="body2">
+                    Origin: {inProgressTrip.t_origin_place_query}
+                  </Typography>
+                  <Typography variant="body2">
+                    Destination: {inProgressTrip.t_destination_place_query}
+                  </Typography>
+                  <Typography variant="body2">
+                    Distance: {inProgressTrip.t_distance}
+                  </Typography>
                 </Grid>
               </Grid>
+
+               </CardContent>
+                </Card>
               {/* Start Trip Button */}
               <Box mt={2}>
-               
-              {inProgressTrip.t_status === "Requested" ? (
-    <Button variant="contained" color="primary" onClick={handleStartTrip}>
-      Start Trip
-    </Button>
-  ) : (
-    <Button variant="contained" color="primary" onClick={handleCompleteTrip}>
-      Complete Trip
-    </Button>
-  )}
-                
+                {inProgressTrip.t_status === "Requested" ? (
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: '#047A9A',
+                      '&:hover': {
+                        backgroundColor: '#035F75', // Darker shade for hover effect
+                      },
+                    }}
+                    onClick={handleStartTrip}
+                  >
+                    Start Trip
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: '#01947A',
+                      '&:hover': {
+                        backgroundColor: '#035F75', // Darker shade for hover effect
+                      },
+                    }}
+                    onClick={handleCompleteTrip}
+                  >
+                    Complete Trip
+                  </Button>
+                )}
               </Box>
-            </CardContent>
-          </Card>
+
+           
+         
           {/* You can add other functionality here if needed */}
         </Box>
       )}

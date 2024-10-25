@@ -70,7 +70,22 @@ const UpcomingTrips = () => {
             <Typography variant="body2">Date: {new Date(trip.t_start_date).toLocaleDateString()}</Typography>
             <Typography variant="body2">Status: {trip.t_status}</Typography>
 
-            <RequestFuel open={showRequestFuel} trip={selectedTripId} onFuelRequestSuccess={handleFuelRequestSuccess} />
+            <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleRequestFuel(trip.id)}
+                  sx={{ marginTop: 2, 
+                     backgroundColor: '#047A9A',
+                    '&:hover': {
+                      backgroundColor: '#035F75', // Darker shade for hover effect
+                    }, }}
+                  disabled={trip.t_status !== "Pending"}
+                  // disabled={fuelRequested} // Disable Start Trip button until fuel is requested
+                >
+                  Request Fuel
+                </Button>
+
+            <RequestFuel open={showRequestFuel} inProgressTripId={selectedTripId} onFuelRequestSuccess={handleFuelRequestSuccess} />
 
             {/* Check if the trip is pending, and the driver has no trip in progress */}
             {inProgressTrip && (
