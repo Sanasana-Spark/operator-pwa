@@ -17,10 +17,19 @@ const RequestFuel = ({
   const [error, setError] = useState(null);
   const inputRef = useRef(null);
 
+
   const handleImageCapture = (event) => {
-    setCapturedImage(event.target.files[0]);
+    const file = event.target.files[0];
+    if (file) {
+      setCapturedImage(URL.createObjectURL(file)); // Create preview URL
+      setError("");
+    }
   };
   
+  const handleRecapture = () => {
+    setCapturedImage(null);
+    inputRef.current.value = ""; // Reset input field
+  };
 
   const handleSubmit = () => {
     if (capturedImage) {
@@ -79,23 +88,51 @@ const RequestFuel = ({
         <Typography variant="body1" paragraph>
           Capture an image of the odometer to request fuel for your trip.
         </Typography>
+
+        {/* Hidden file input */}
         <input
           ref={inputRef}
           type="file"
           accept="image/*"
           capture="environment"
           onChange={handleImageCapture}
-          style={{ display: 'none' }}
+          style={{ display: "none" }}
         />
-        <Button variant="contained" color="primary" onClick={() => inputRef.current.click()} style={{ marginBottom: "20px" }}>
-          Open Camera
-        </Button>
+
+        {/* Show captured image if available */}
+        {capturedImage ? (
+          <div style={{ textAlign: "center", marginBottom: "20px" }}>
+            <img
+              src={capturedImage}
+              alt="Captured"
+              style={{
+                width: "100%",
+                maxHeight: "300px",
+                objectFit: "contain",
+                borderRadius: "8px"
+              }}
+            />
+            <Button variant="contained" color="secondary" onClick={handleRecapture} style={{ marginTop: "10px" }}>
+              Recapture Image
+            </Button>
+          </div>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => inputRef.current.click()}
+            style={{ marginBottom: "20px" }}
+          >
+            Open Camera
+          </Button>
+        )}
+
         {loading && <CircularProgress />}
         {error && <Typography color="error">{error}</Typography>}
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel} color="primary">Cancel</Button>
-        <Button onClick={handleSubmit} color="primary" disabled={loading}>
+        <Button onClick={handleSubmit} color="primary" disabled={loading || !capturedImage}>
           {loading ? "Submitting..." : "Submit"}
         </Button>
       </DialogActions>
