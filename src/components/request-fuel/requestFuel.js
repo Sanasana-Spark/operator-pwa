@@ -6,7 +6,6 @@ const RequestFuel = ({
   open,
   onCancel,
   inProgressTripId,
-  inProgressTrip,
   setFuelRequested,
   onCloseModal // Handler to close the modal
 }) => {
@@ -21,6 +20,7 @@ const RequestFuel = ({
   const handleImageCapture = (event) => {
     setCapturedImage(event.target.files[0]);
   };
+  
 
   const handleSubmit = () => {
     if (capturedImage) {
