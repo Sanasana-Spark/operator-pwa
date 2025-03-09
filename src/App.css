@@ -2,6 +2,19 @@
   text-align: center;
 }
 
+:root {
+  --main-bg-color: white;
+  --primary-color: #047A9A;
+  --faded-primary-color: whitesmoke;
+  --secondary-color: #01947A;
+  --main-text-color: black;
+  --gray-color: #333;
+  --font-family: 'lato', sans-serif;
+  --padding: 16px;
+  --margin: 8px;
+}
+
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -11,6 +24,7 @@
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
+
 }
 
 .App-header {

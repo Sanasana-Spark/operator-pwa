@@ -1,19 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { GoogleMap, useJsApiLoader, DirectionsRenderer } from "@react-google-maps/api";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  useJsApiLoader,
+  GoogleMap,
+  DirectionsRenderer,
+} from "@react-google-maps/api";
+const libraries = ["places"];
 
 const DirectionsMap = ({ origin, destination, center }) => {
   const [directionsResponse, setDirectionsResponse] = useState(null);
   
   // Load Google Maps JS API
+  // const { isLoaded } = useJsApiLoader({
+  //   googleMapsApiKey:process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Replace with your API Key
+  //   libraries: ["places"]
+  // });
+
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey:process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Replace with your API Key
-    libraries: ["places"]
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    libraries,
   });
 
   // Map container styles
   const containerStyle = {
     width: '100%',
-    height: '50vh',
+    height: '500px',
   };
 
   // Center of the map (you can set it to any default coordinates)
@@ -43,6 +53,8 @@ const DirectionsMap = ({ origin, destination, center }) => {
     }
   };
 
+  console.log(directionsResponse)
+
   // Run when component loads or when origin/destination changes
   useEffect(() => {
     if (isLoaded) {
@@ -52,6 +64,16 @@ const DirectionsMap = ({ origin, destination, center }) => {
   // eslint-disable-next-line
    [isLoaded, origin, destination]);
 
+
+  const options = useMemo(
+    () => ({
+      mapId: "9ebfa89edaafd2e",
+      disableDefaultUI: false,
+      clickableIcons: false,
+    }),
+    []
+  );
+
   if (!isLoaded) return <div>Loading...</div>;
 
   return (
@@ -59,10 +81,13 @@ const DirectionsMap = ({ origin, destination, center }) => {
       mapContainerStyle={containerStyle}
       center={center}
       zoom={10}
+      options={options}
     >
       {directionsResponse && (
         <DirectionsRenderer directions={directionsResponse} />
       )}
+
+
     </GoogleMap>
   );
 };
