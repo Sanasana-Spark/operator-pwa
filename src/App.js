@@ -28,7 +28,6 @@ const App = () => {
             <Route path="/driver1" element={<SignedIn><DriverLayout><DriverView /></DriverLayout></SignedIn>} />
             <Route path="/drive" element={<SignedIn><DriverLayout><DriverHome /></DriverLayout></SignedIn>} />
             <Route path="/history" element={<SignedIn><DriverLayout><TripHistory /></DriverLayout></SignedIn>} />
-            <Route path="/newtrips" element={<SignedIn><DriverLayout><UpcomingTrips /></DriverLayout></SignedIn>} />
             <Route path="/logout" element={<SignedIn><DriverLayout><Logout /></DriverLayout></SignedIn>} />
 
             {/* New Route for RequestFuel */}

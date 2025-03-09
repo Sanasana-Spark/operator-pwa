@@ -3,7 +3,7 @@ import { Box, Typography, Button, Card, CardContent, CircularProgress, IconButto
 import CardMedia from '@mui/material/CardMedia';
 // Import the useAuthContext hook
 import { useAuthContext } from '../components/onboarding/authProvider';
-import RequestFuel from '../components/request-fuel/requestFuel';
+// import RequestFuel from '../components/request-fuel/requestFuel';
 import '../App.css';
 import truck_image from '../../src/assets/truck.png';
 import pin_location from '../../src/assets/pin_location.png';
@@ -12,20 +12,16 @@ import clock_icon from '../../src/assets/clock_icon.png';
 
 const UpcomingTrips = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  
-  // Get org_id and userId from the useAuthContext
   const { org_id, userId } = useAuthContext();
   
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showRequestFuel, setshowRequestFuel] = useState(false);
-  const [selectedTripId, setselectedTripId] = useState(null);
   const [inProgressTrip, setInProgressTrip] = useState(null);
   const [fuelRequested, setFuelRequested] = useState(false);
 
   useEffect(() => {
     if (org_id && userId) {
-      const apiUrl = `${baseURL}/trips/${org_id}/${userId}`;  // Update URL with org_id and userId
+      const apiUrl = `${baseURL}/trips/by_user/${org_id}/${userId}`;  // Update URL with org_id and userId
       fetch(apiUrl)
         .then((response) => {
           if (!response.ok) {
@@ -36,7 +32,8 @@ const UpcomingTrips = () => {
         .then((data) => {
           const inProgress = data.find(trip => trip.t_status === 'In-progress');
           setInProgressTrip(inProgress); // Set in-progress trip if it exists
-          setTrips(data); // Set all trips
+          setTrips(data.filter((trip) => ["Requested", "Pending"].includes(trip.t_status)));
+ 
           setLoading(false); // Loading is complete
         })
         .catch((error) => {
@@ -46,17 +43,31 @@ const UpcomingTrips = () => {
     } else {
       console.error("User or Organization ID missing.");
     }
-  }, [baseURL, org_id, userId]);
+  }, [baseURL, org_id, userId, fuelRequested]);
 
   const handleRequestFuel = (tripId) => {
-    setselectedTripId(tripId);
-    setshowRequestFuel(true);
-  };
-
-
-  const handleFuelRequestSuccess = () => {
-    setFuelRequested(true); // Set fuel requested state to true
-  };
+    const url = `${baseURL}/fuel/${org_id}/${userId}/${tripId}/`;
+    const data = {
+      f_created_by:userId,
+      f_organization_id:org_id,
+      f_request_type:"Original"
+    };
+    const Options = { 
+      method: "POST", 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data) 
+    };
+    fetch(url, Options)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Fuel request failed");
+        }
+        setFuelRequested(true);
+        console.log("fuel requested successfully");
+      });
+    };
 
   if (loading) {
     return (
@@ -69,6 +80,7 @@ const UpcomingTrips = () => {
   return (
     <Box padding={2}>
       {trips.map((trip) => (
+        
         <Card key={trip.id} sx={{ display: 'flex', marginBottom: 3, borderRadius: 5, alignItems: 'flex-start', justifyContent: 'space-between' }}>
         
           <Box sx={{ display: 'flex', flexDirection: 'column', borderRadius: 5, marginLeft:2 }}>
@@ -146,12 +158,12 @@ const UpcomingTrips = () => {
                   </Typography>
                 </CardContent>
 
-                <RequestFuel
+                {/* <RequestFuel
                   open={showRequestFuel}
                   onCancel={() => setshowRequestFuel(false)}
                   inProgressTripId={selectedTripId}
                   onFuelRequestSuccess={handleFuelRequestSuccess}
-                />
+                /> */}
                 {/* Check if the trip is pending, and the driver has no trip in progress */}
             {inProgressTrip && (
               <Button
