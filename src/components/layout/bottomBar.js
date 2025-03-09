@@ -20,7 +20,7 @@ const BottomBar = () => {
         return 0;
       case '/drive':
         return 1;
-      case '/newtrips':
+      case '/':
         return 2;
       default:
         return 1; // Default to 'Drive' if no match
@@ -52,7 +52,7 @@ const BottomBar = () => {
       />
       <BottomNavigationAction
         component={LinkWrapper}
-        to="/newtrips"
+        to="/"
         label="New Trips"
         icon={<TripOriginIcon />}
       />
