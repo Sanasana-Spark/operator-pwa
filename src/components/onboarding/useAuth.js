@@ -34,10 +34,10 @@ export const useAuth = () => {
 
 
     fetchOrganization();
-  }, [userId]);
+  }, [user_id, user_email]);
 
   const org_id = organization?.id;
   const org_name = organization?.org_name;
 
-  return { userId, userEmail,org_id, org_name };
+  return { userId,user_id,userEmail,user_email,org_id, org_name };
 };
