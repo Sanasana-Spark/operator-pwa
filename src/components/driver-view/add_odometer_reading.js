@@ -6,7 +6,10 @@ import {
     DialogActions,
     Button,
     TextField,
+    Box,
+    IconButton
 } from '@mui/material';
+import FlipCameraAndroidIcon from "@mui/icons-material/FlipCameraAndroid";
 
 const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
     const [, setFormData] = useState({});
@@ -16,6 +19,8 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
     const [stream, setStream] = useState(null);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+    const [cameraFacing, setCameraFacing] = useState("environment"); // Default to back camera
+
 
     const takePicture = () => {
         const video = videoRef.current;
@@ -34,34 +39,67 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
         }
         setStream(null);
     };
+    console.log(image)
 
-    const initializeMedia = async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setStream(stream);
-        if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            videoRef.current.play();
-        }
-
-        // Get geolocation
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    setLocation({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                    });
-                },
-                (error) => {
-                    console.error("Error getting location:", error);
-                }
-            );
+    const initializeMedia = async (cameraFacing) => {
+        console.log(cameraFacing)
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                 video: { facingMode: cameraFacing }
+            });
+            setStream(stream);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                videoRef.current.play();
+            }
+    
+            // Get geolocation
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        setLocation({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        });
+                    },
+                    (error) => {
+                        console.error("Error getting location:", error);
+                    }
+                );
+            }
+        } catch (error) {
+            console.error("Error accessing camera:", error);
         }
     };
 
+    // const initializeMedia = async () => {
+    //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    //     setStream(stream);
+    //     if (videoRef.current) {
+    //         videoRef.current.srcObject = stream;
+    //         videoRef.current.play();
+    //     }
+
+    //     // Get geolocation
+    //     if (navigator.geolocation) {
+    //         navigator.geolocation.getCurrentPosition(
+    //             (position) => {
+    //                 setLocation({
+    //                     latitude: position.coords.latitude,
+    //                     longitude: position.coords.longitude,
+    //                 });
+    //             },
+    //             (error) => {
+    //                 console.error("Error getting location:", error);
+    //             }
+    //         );
+    //     }
+    // };
+
+
     useEffect(() => {
         if (openDialog) {
-            initializeMedia();
+            initializeMedia(cameraFacing);
         } else {
             if (stream) {
                 stream.getTracks().forEach((track) => track.stop());
@@ -70,7 +108,32 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
         }
     },
     // eslint-disable-next-line
-     [openDialog]);
+     [openDialog, cameraFacing]);
+
+
+    const toggleCamera = () => {
+        if (stream) {
+            stream.getTracks().forEach((track) => track.stop());
+        }
+        setStream(null);
+        
+        setCameraFacing((prevFacing) => (prevFacing === "user" ? "environment" : "user"));
+    };
+
+    // useEffect(() => {
+    //     if (openDialog) {
+    //         initializeMedia();
+    //     } else {
+    //         if (stream) {
+    //             stream.getTracks().forEach((track) => track.stop());
+    //         }
+    //         setStream(null);
+    //     }
+    // },
+    // // eslint-disable-next-line
+    //  [openDialog]);
+
+    
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -118,6 +181,7 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
                 )}
 
                 {!image && (
+                    <Box>
                     <Button
                         variant="contained"
                         sx={{ marginTop: 2 }}
@@ -125,6 +189,15 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
                     >
                         Capture Image
                     </Button>
+
+                    <IconButton
+    sx={{ marginTop: 2 }}
+    onClick={toggleCamera}
+    color="primary"
+>
+    <FlipCameraAndroidIcon />
+</IconButton>
+</Box>
                 )}
 
                 {image && (
@@ -152,6 +225,7 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
                         <p>Longitude: {location.longitude}</p>
                     </Box>
                 )} */}
+
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
