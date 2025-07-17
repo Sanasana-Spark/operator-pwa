@@ -13,6 +13,7 @@ import FlipCameraAndroidIcon from "@mui/icons-material/FlipCameraAndroid";
 
 const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
     const [, setFormData] = useState({});
+    const[saving , setSaving] = useState(false);
     const [image, setImage] = useState(null);
     const [odometerReading, setOdometerReading] = useState('');
     const [location, setLocation] = useState(null);
@@ -72,29 +73,6 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
         }
     };
 
-    // const initializeMedia = async () => {
-    //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    //     setStream(stream);
-    //     if (videoRef.current) {
-    //         videoRef.current.srcObject = stream;
-    //         videoRef.current.play();
-    //     }
-
-    //     // Get geolocation
-    //     if (navigator.geolocation) {
-    //         navigator.geolocation.getCurrentPosition(
-    //             (position) => {
-    //                 setLocation({
-    //                     latitude: position.coords.latitude,
-    //                     longitude: position.coords.longitude,
-    //                 });
-    //             },
-    //             (error) => {
-    //                 console.error("Error getting location:", error);
-    //             }
-    //         );
-    //     }
-    // };
 
 
     useEffect(() => {
@@ -120,23 +98,10 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
         setCameraFacing((prevFacing) => (prevFacing === "user" ? "environment" : "user"));
     };
 
-    // useEffect(() => {
-    //     if (openDialog) {
-    //         initializeMedia();
-    //     } else {
-    //         if (stream) {
-    //             stream.getTracks().forEach((track) => track.stop());
-    //         }
-    //         setStream(null);
-    //     }
-    // },
-    // // eslint-disable-next-line
-    //  [openDialog]);
-
-    
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setSaving(true);
         const newFormData = {
             image: image,
             odometerReading: odometerReading,
@@ -184,7 +149,7 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
                     <Box>
                     <Button
                         variant="contained"
-                        sx={{ marginTop: 2 }}
+                        sx={{ marginTop: 2, background: 'var(--secondary-color)' }}
                         onClick={takePicture}
                     >
                         Capture Image
@@ -193,7 +158,7 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
                     <IconButton
     sx={{ marginTop: 2 }}
     onClick={toggleCamera}
-    color="primary"
+    color="#01947A"
 >
     <FlipCameraAndroidIcon />
 </IconButton>
@@ -203,7 +168,7 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
                 {image && (
                     <Button
                         variant="contained"
-                        sx={{ marginTop: 2 }}
+                        sx={{ marginTop: 2, background: 'var(--primary-color)' }}
                         onClick={handleRecapture}
                     >
                         Recapture Image
@@ -213,28 +178,32 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
                 <TextField
                     label="Odometer Reading"
                     variant="outlined"
+                    type="number"
                     fullWidth
                     sx={{ marginTop: 2 }}
                     value={odometerReading}
                     onChange={(e) => setOdometerReading(e.target.value)}
                 />
 
-                {/* {location && (
-                    <Box sx={{ marginTop: 2 }}>
-                        <p>Latitude: {location.latitude}</p>
-                        <p>Longitude: {location.longitude}</p>
-                    </Box>
-                )} */}
+           
 
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                    setImage(null);
+                    setOdometerReading(null);
+                    setOpenDialog(false);
+                    setSaving(false);
+                } }
+                sx={{ marginRight: 1, color: 'var(--primary-color)' }}
+                >Cancel</Button>
                 <Button
                     variant="contained"
-                    color="primary"
                     onClick={handleSubmit}
+                    disabled={saving}
+                    sx={{ marginLeft: 1, backgroundColor: 'var(--secondary-color)', color: 'white' }}
                 >
-                    Submit
+                    {saving ? 'Submitting...' : 'Submit'}
                 </Button>
             </DialogActions>
         </Dialog>
