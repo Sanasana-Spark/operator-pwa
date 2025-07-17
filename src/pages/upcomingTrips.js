@@ -123,32 +123,36 @@ const UpcomingTrips = () => {
 
               <Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: 'small' }}>
-                  <Button
+                  <Typography
                     variant="contained"
                     color="primary"
                     sx={{
                       padding: 0,
                       paddingRight: '5px',
-                      backgroundColor: 'var(--secondary-color)',
+                      backgroundColor: 'var(--primary-color)',
+                      color: 'white',
                       width: 'fit-content',
                       height: 30,
-                      fontSize: '0.55rem', // Adjust font size to fit the button size
+                      fontSize: '0.55rem', 
+                      borderRadius: 1,
                     }}
                   >
                     <IconButton aria-label="location">
                       <img src={navigation_icon} alt="custom icon" width={15} height="inherit" />
                     </IconButton>
                     {trip.t_distance}
-                  </Button>
+                  </Typography>
 
                   <Button
                     variant="contained"
-                    color="primary"
+                  
                     onClick={() => handleRequestFuel(trip.id)}
                     sx={{
                       height: 30,
                       width: 'fit-content',
-                      fontSize: '0.55rem', // Adjust font size to fit the button size
+                      fontSize: '0.55rem', 
+                      backgroundColor: 'var(--secondary-color)',
+                      color: 'white',
                     }}
                     disabled={trip.t_status !== 'Pending'}
                     >

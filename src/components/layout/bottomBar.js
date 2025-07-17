@@ -36,6 +36,13 @@ const BottomBar = () => {
     <BottomNavigation
       showLabels
       value={value}
+      sx={{
+        width: '100%',
+        position: 'fixed',
+        bottom: 0,
+        backgroundColor: 'white',
+        borderTop: '1px solid #e0e0e0',
+      }}
       // style={{ width: '100%', position: 'fixed', bottom: 0 }}
     >
       <BottomNavigationAction
@@ -43,18 +50,27 @@ const BottomBar = () => {
         to="/history"
         label="History"
         icon={<HistoryIcon />}
+        sx={{'&.Mui-selected': {
+          color: 'var(--secondary-color)'
+        }}}
       />
       <BottomNavigationAction
         component={LinkWrapper}
         to="/drive"
         label="Drive"
         icon={<DirectionsCarIcon />}
+        sx={{'&.Mui-selected': {
+          color: 'var(--secondary-color)'
+        }}}
       />
       <BottomNavigationAction
         component={LinkWrapper}
         to="/"
         label="New Trips"
         icon={<TripOriginIcon />}
+        sx={{'&.Mui-selected': {
+          color: 'var(--secondary-color)'
+        }}}
       />
     </BottomNavigation>
     </Box>
