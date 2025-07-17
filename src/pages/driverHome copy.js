@@ -8,7 +8,7 @@ import {
   IconButton,
   CircularProgress,
   Button,
-  Alert,
+  Grid,
 } from "@mui/material";
 import CardMedia from "@mui/material/CardMedia";
 import { useAuthContext } from "../components/onboarding/authProvider";
@@ -26,7 +26,7 @@ const DriverHome = () => {
   const [selectedTrip, setSelectedTrip] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [openCompleteTripDialog, setOpenCompleteTripDialog] = useState(false);
-  const [openStartTripDialog, setOpenStartTripDialog] = useState(false);
+  const [openStartTripDialog, setOpenStartTripDialog] = useState(false)
 
   const [, setImage] = useState(null);
   const [, setOdometerReading] = useState("");
@@ -48,9 +48,7 @@ const DriverHome = () => {
       })
       .then((data) => {
         setLoading(false);
-        const inProgressTrip = data.find(
-          (trip) => trip.t_status === "In-Progress"
-        );
+        const inProgressTrip = data.find((trip) => trip.t_status === "In-Progress");
         setInProgressTrip(inProgressTrip);
 
         setPendingTrips(data.filter((trip) => trip.t_status === "Requested"));
@@ -62,23 +60,27 @@ const DriverHome = () => {
       });
   }, [baseURL, org_id, userId, success]); // Update dependencies to include org_id and userId
 
+
   const handleStartTripReading = async (trip) => {
-    setOpenStartTripDialog(true);
-    setSelectedTrip(trip);
-  };
+    setOpenStartTripDialog(true)
+    setSelectedTrip(trip)
+  }
   const handleOdometerReading = async () => {
     setOpenDialog(true); // Open dialog for capturing image and entering details
   };
   const handleCompleteTripReading = async () => {
-    setOpenCompleteTripDialog(true);
-  };
-  const cancelDialog = async () => {
+    setOpenCompleteTripDialog(true)
+  }
+  const cancelDialog = async () =>{
     setOpenDialog(false);
-    setOpenStartTripDialog(false);
-    setOpenCompleteTripDialog(false);
-  };
+    setOpenStartTripDialog(false)
+    setOpenCompleteTripDialog(false)
+
+  }
+
 
   const handleSubmit = async (formData) => {
+    setLoading(true);
     setError(null);
     setSuccess(null);
 
@@ -91,7 +93,7 @@ const DriverHome = () => {
       or_reading: null,
       or_latitude: formData.latitude,
       or_longitude: formData.longitude,
-      or_description: "continous",
+      or_description:"continous"
     };
 
     try {
@@ -112,7 +114,7 @@ const DriverHome = () => {
 
       setSuccess("Odometer reading submitted successfully!");
       setOpenDialog(false);
-      setOdometerReading(null);
+      setOdometerReading("");
       setImage(null);
       setLocation(null);
     } catch (err) {
@@ -123,12 +125,13 @@ const DriverHome = () => {
   };
 
   const handleStartTrip = async (formData) => {
+    setLoading(true);
     setError(null);
     setSuccess(null);
     const payload = {
       id: selectedTrip.id,
       t_status: "In-Progress",
-      or_description: "start_trip",
+      or_description:"start_trip",
       or_trip_id: selectedTrip.id,
       or_asset_id: selectedTrip.t_asset_id,
       or_operator_id: selectedTrip.t_operator_id,
@@ -151,12 +154,12 @@ const DriverHome = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed start trip");
+        throw new Error("Failed to submit odometer reading");
       }
 
-      setSuccess("Trip started successfully!");
+      setSuccess("Odometer reading submitted successfully!");
       setOpenStartTripDialog(false);
-      setOdometerReading(null);
+      setOdometerReading("");
       setImage(null);
       setLocation(null);
     } catch (err) {
@@ -167,12 +170,14 @@ const DriverHome = () => {
   };
 
   const handleCompleteTrip = async (formData) => {
+    console.log(formData)
+    setLoading(true);
     setError(null);
     setSuccess(null);
     const payload = {
       id: inProgressTrip.id,
       t_status: "Completed",
-      or_description: "complete_trip",
+      or_description:"complete_trip",
       or_trip_id: inProgressTrip.id,
       or_asset_id: inProgressTrip.t_asset_id,
       or_operator_id: inProgressTrip.t_operator_id,
@@ -195,13 +200,13 @@ const DriverHome = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to complete trip");
+        throw new Error("Failed to submit odometer reading");
       }
 
-      setSuccess("trip completed successfully!");
+      setSuccess("Odometer reading submitted successfully!");
       setOpenCompleteTripDialog(false);
 
-      setOdometerReading(null);
+      setOdometerReading("");
       setImage(null);
       setLocation(null);
     } catch (err) {
@@ -225,73 +230,13 @@ const DriverHome = () => {
   }
 
   return (
-    <Box sx={{ padding: 1, paddingTop:0, height:"80vh" ,maxHeight: "80vh", overflowY: "scroll" }}>
-      {success && (
-        <Box sx={{
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    color: 'green',
-    border: '1px solid var(--secondary-color)',
-    zIndex: 1300, // ensures it appears above other components
-    minWidth: 300,
-  }}>
-          <Alert severity='success' onClose={() => setSuccess(null)} >{success}</Alert>
-        </Box>
-      )}
-      {inProgressTrip && (
+    <>
+      {!loading && (
         <Box>
-          
-
-          <Map
-            origin={inProgressTrip.t_origin_place_query}
-            destination={inProgressTrip.t_destination_place_query}
-            key={inProgressTrip.id}
-            center={inProgressTrip.t_origin_place_query}
-          />
-
-          <Box sx={{ display: "grid", alignItems: "center", marginBottom: 2 }}>
-          <Typography variant="body1" gutterBottom>
-           ( {inProgressTrip.t_distance} ) From {inProgressTrip.t_origin_place_query}
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            To {inProgressTrip.t_destination_place_query}
-          </Typography>
-          </Box>
-
-<Box>
-  <Button variant="contained" onClick={handleOdometerReading}
-  sx={{ marginRight: 2,
-    backgroundColor: "var(--primary-color)",
-    "&:hover": {
-      backgroundColor: "var(--primary-hover-color)",
-    },
-    borderRadius: 10,
-  }}
-  >
-     Send Reading
-  </Button>
-  <Button variant="contained" onClick={handleCompleteTripReading}
-   sx={{
-                  backgroundColor: "var(--secondary-color)",
-                  "&:hover": {
-                    backgroundColor: "var(--secondary-hover-color)",
-                  },
-                  borderRadius: 10,
-                }}
-                >
-    Complete Trip
-  </Button>
-   </Box>
-
-          </Box>
-      )}
-
-{pendingTrips.length > 0 &&  !inProgressTrip && (
-        <Box >
-          
-            {pendingTrips.map((trip) => (
+          {/* Show Pending Trips when no trip is in progress */}
+          {!inProgressTrip ? (
+            <Box container alignItems="center" spacing={1}>
+              {pendingTrips.map((trip) => (
                 <Card
                   key={trip.id}
                   sx={{
@@ -396,33 +341,88 @@ const DriverHome = () => {
                 </Card>
               ))}
 
-           </Box>
+      {/* Odometer Dialog */}
+      <AddOdReading
+              openDialog={openStartTripDialog}
+              setOpenDialog={cancelDialog}
+              onSubmit={handleStartTrip}
+              
+              />
+
+              
+
+            </Box>
+          ) : (
+            // Show Active Trip when there is one in progress
+            <Box container alignItems="center" spacing={1} paddingBottom="5px">
+              <Map
+                origin={inProgressTrip.t_origin_place_query}
+                destination={inProgressTrip.t_destination_place_query}
+                key={inProgressTrip.id}
+                center={inProgressTrip.t_origin_place_query}
+              />
+
+              <Grid container alignItems="center" spacing={2}>
+                <Grid>
+                  <Typography variant="body2">
+                    LPO: {inProgressTrip.id} {inProgressTrip.t_type}
+                  </Typography>
+                  <Typography variant="body2">
+                    Origin: {inProgressTrip.t_origin_place_query}
+                  </Typography>
+                  <Typography variant="body2">
+                    Destination: {inProgressTrip.t_destination_place_query}
+                  </Typography>
+                  <Typography variant="body2">
+                    Distance: {inProgressTrip.t_distance}
+                  </Typography>
+                </Grid>
+              </Grid>
+
+              {/* Odometer Reading Button */}
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "#FF9800", marginRight: 2 }}
+                onClick={handleOdometerReading}
+              >
+                Send Odometer Reading
+              </Button>
+               {/* Odometer Dialog */}
+               <AddOdReading
+              openDialog={openDialog}
+              setOpenDialog={cancelDialog}
+              onSubmit={handleSubmit}
+              
+              />
+
+
+              {/* Complete Trip Button */}
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#01947A",
+                  "&:hover": {
+                    backgroundColor: "#035F75",
+                  },
+                }}
+                onClick={handleCompleteTripReading} >
+                Complete Trip
+              </Button>
+ {/* Odometer Dialog on complete */}
+              <AddOdReading
+              openDialog={openCompleteTripDialog}
+              setOpenDialog={cancelDialog}
+              onSubmit={handleCompleteTrip}
+              
+              />
+
+             
+             
+            </Box>
+          )}
+        </Box>
       )}
-
-
-
-       <AddOdReading
-                    openDialog={openDialog}
-                    setOpenDialog={cancelDialog}
-                    onSubmit={handleSubmit}
-                    
-                    />
-
-                      <AddOdReading
-                                  openDialog={openCompleteTripDialog}
-                                  setOpenDialog={cancelDialog}
-                                  onSubmit={handleCompleteTrip}
-                                  
-                                  />
-
-                                     {/* Odometer Dialog */}
-                                        <AddOdReading
-                                                openDialog={openStartTripDialog}
-                                                setOpenDialog={cancelDialog}
-                                                onSubmit={handleStartTrip}
-                                                
-                                                />
-    </Box>
+    </>
   );
 };
 

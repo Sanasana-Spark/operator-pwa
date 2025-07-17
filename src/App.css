@@ -4,11 +4,14 @@
 
 :root {
   --main-bg-color: white;
-  --primary-color: #047A9A;
+  --secondary-bg-color: whitesmoke;
   --faded-primary-color: whitesmoke;
+  --primary-color: #047A9A;
+  --primary-hover-color: #25c3ef;
   --secondary-color: #01947A;
-  --main-text-color: black;
-  --gray-color: #333;
+  --secondary-hover-color: #85fbe3;
+  --primary-text-color: black;
+  --secondary-text-color: gray;
   --font-family: 'lato', sans-serif;
   --padding: 16px;
   --margin: 8px;

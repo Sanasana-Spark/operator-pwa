@@ -29,28 +29,22 @@ const TopBar = () => {
   };
 
   return (
-    <React.Fragment>
-      <Box sx={{ display: "flex", alignItems: "center", textAlign: "center", width: '100vw', position: "fixed", top: 0, zIndex: 1000, backgroundColor: "white", borderBottom: "1px solid #e0e0e0" }}>
-      <Grid container spacing={0.2}>
-      <Grid size={12}>
- <img
+    <Box sx={{ position: "fixed", top: 0, zIndex: 1000, width: '100%', backgroundColor: "white", borderBottom: "1px solid #e0e0e0" }}>
+      <Box sx={{ display: "flex", alignItems: "center", width: '100vw',  justifyContent: "space-between" }}>
+
+      <img
             src={Logo}
             alt="logo driver"
             style={{
               maxHeight: "50px",
             }}
           />
-</Grid>
 
-       
+          <Grid>
 
-<Grid size={12} container alignItems="center" justifyContent="space-between" paddingInline={"3px"}>
-
-  
-
-         
-          
-<Grid item xs={6} container alignItems="left"  justifyContent="flex-start">
+          <IconButton color="inherit" aria-label="notifications">
+            <NotificationsIcon />
+          </IconButton>
           <Tooltip title="Account settings">
           <IconButton
             onClick={handleClick}
@@ -63,23 +57,17 @@ const TopBar = () => {
           <UserButton />
           </IconButton>
           </Tooltip>
-          <IconButton color="inherit" style={{ marginRight: "5px" }}>
-            <NotificationsIcon />
-          </IconButton>
-          </Grid>
 
-
-          <Grid item xs={4} container justifyContent="flex-end">
-          <Typography variant="body1" style={{ minWidth: "100" }}>
-            {org_name}
-          </Typography>
-          </Grid>
-
+        </Grid>
+      
+       
+     
           
-          </Grid>
-
-          </Grid>
-          
+      </Box>
+      <Box sx={{ display: "flex", justifyContent: "right", width: '100%' }}>
+        <Typography variant="body1" sx={{ fontWeight: "semi-bold", color: "black" }}>
+          {org_name}
+        </Typography>
       </Box>
 
       <Menu
@@ -139,7 +127,7 @@ const TopBar = () => {
         </MenuItem>
       </Menu>
 
-    </React.Fragment>
+    </Box>
   );
 };
 
