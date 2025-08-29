@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Map from "../components/maps/singleTripMap";
 import {
   Box,
@@ -33,6 +33,7 @@ const DriverHome = () => {
   const [, setLocation] = useState(null);
   const [success, setSuccess] = useState(null);
   const [, setError] = useState(null);
+   const intervalRef = useRef(null);
 
   useEffect(() => {
     // Construct the API URL using org_id and userId
@@ -210,6 +211,48 @@ const DriverHome = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (inProgressTrip && "geolocation" in navigator) {
+      const getLocation = () => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const coords = {
+              or_trip_id: inProgressTrip.id,
+              or_asset_id: inProgressTrip.t_asset_id,
+              or_operator_id: inProgressTrip.t_operator_id,
+              or_latitude: pos.coords.latitude,
+              or_longitude: pos.coords.longitude,
+              or_description: "continous",
+
+            };
+
+            // Send to backend
+            fetch(`${baseURL}/trips/location_phone/${org_id}/${userId}/${inProgressTrip.id}/`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(coords),
+            }).catch(console.error);
+          },
+          (err) => setError(err.message),
+          { enableHighAccuracy: true }
+        );
+      };
+
+      // Run immediately and then every 10 mins
+      getLocation();
+      intervalRef.current = setInterval(getLocation, 600000);
+
+      // Cleanup when trip ends or component unmounts
+      return () => clearInterval(intervalRef.current);
+    } else {
+      // If trip stops, clear any running interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }
+  }, [baseURL, inProgressTrip, org_id, userId]);
 
   if (loading) {
     return (
