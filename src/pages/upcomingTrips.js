@@ -76,6 +76,15 @@ const UpcomingTrips = () => {
       </Box>
     );
   }
+  if (trips.length === 0) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <Typography variant="h6" color="text.secondary">
+          No assigned trips found.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box padding={2}>
