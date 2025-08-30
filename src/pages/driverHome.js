@@ -266,6 +266,15 @@ const DriverHome = () => {
       </Box>
     );
   }
+  if (pendingTrips.length === 0 && !inProgressTrip) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <Typography variant="h6" color="text.secondary">
+          No approved trips found. Check new trip requests.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ padding: 1, paddingTop:0, height:"80vh" ,maxHeight: "80vh", overflowY: "scroll" }}>
