@@ -12,7 +12,7 @@ import clock_icon from '../../src/assets/clock_icon.png';
 
 const UpcomingTrips = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const { org_id, userId } = useAuthContext();
+  const { org_id, user_id } = useAuthContext();
   
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,8 +20,8 @@ const UpcomingTrips = () => {
   const [fuelRequested, setFuelRequested] = useState(false);
 
   useEffect(() => {
-    if (org_id && userId) {
-      const apiUrl = `${baseURL}/trips/by_user/${org_id}/${userId}`;  // Update URL with org_id and userId
+    if (org_id && user_id) {
+      const apiUrl = `${baseURL}/trips/by_user/${org_id}/${user_id}`;  // Update URL with org_id and user_id
       fetch(apiUrl)
         .then((response) => {
           if (!response.ok) {
@@ -43,12 +43,12 @@ const UpcomingTrips = () => {
     } else {
       console.error("User or Organization ID missing.");
     }
-  }, [baseURL, org_id, userId, fuelRequested]);
+  }, [baseURL, org_id, user_id, fuelRequested]);
 
   const handleRequestFuel = (tripId) => {
-    const url = `${baseURL}/fuel/${org_id}/${userId}/${tripId}/`;
+    const url = `${baseURL}/fuel/${org_id}/${user_id}/${tripId}/`;
     const data = {
-      f_created_by:userId,
+      f_created_by:user_id,
       f_organization_id:org_id,
       f_request_type:"Original"
     };
