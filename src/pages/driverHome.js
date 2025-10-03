@@ -19,7 +19,7 @@ import AddOdReading from "../components/driver-view/add_odometer_reading";
 
 const DriverHome = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const { org_id, userId } = useAuthContext(); // Extract org_id and userId
+  const { apiFetch } = useAuthContext();
   const [loading, setLoading] = useState(true);
   const [inProgressTrip, setInProgressTrip] = useState(null);
   const [pendingTrips, setPendingTrips] = useState([]);
@@ -36,11 +36,8 @@ const DriverHome = () => {
    const intervalRef = useRef(null);
 
   useEffect(() => {
-    // Construct the API URL using org_id and userId
-    const apiUrl = `${baseURL}/trips/by_user/${org_id}/${userId}/`;
-    console.log(apiUrl);
-
-    fetch(apiUrl)
+    const apiUrl = `${baseURL}/trips/by_user/`;
+    apiFetch(apiUrl, { method: "GET" })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -55,13 +52,12 @@ const DriverHome = () => {
         setInProgressTrip(inProgressTrip);
 
         setPendingTrips(data.filter((trip) => trip.t_status === "Requested"));
-        // console.log("Pending Trips:", pendingTrips);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
         setLoading(false);
       });
-  }, [baseURL, org_id, userId, success]); // Update dependencies to include org_id and userId
+  }, [baseURL, apiFetch, success]);
 
   const handleStartTripReading = async (trip) => {
     setOpenStartTripDialog(true);
@@ -96,8 +92,8 @@ const DriverHome = () => {
     };
 
     try {
-      const response = await fetch(
-        `${baseURL}/trips/odometer/${org_id}/${userId}/`,
+      const response = await apiFetch(
+        `${baseURL}/trips/odometer/`,
         {
           method: "POST",
           headers: {
@@ -140,8 +136,8 @@ const DriverHome = () => {
       or_longitude: formData.longitude,
     };
     try {
-      const response = await fetch(
-        `${baseURL}/trips/${org_id}/${userId}/${selectedTrip.id}/`,
+      const response = await apiFetch(
+        `${baseURL}/trips/${selectedTrip.id}/`,
         {
           method: "POST",
           headers: {
@@ -184,8 +180,8 @@ const DriverHome = () => {
       or_longitude: formData.longitude,
     };
     try {
-      const response = await fetch(
-        `${baseURL}/trips/${org_id}/${userId}/${inProgressTrip.id}/`,
+      const response = await apiFetch(
+        `${baseURL}/trips/${inProgressTrip.id}/`,
         {
           method: "POST",
           headers: {
@@ -228,7 +224,7 @@ const DriverHome = () => {
             };
 
             // Send to backend
-            fetch(`${baseURL}/trips/location_phone/${org_id}/${userId}/${inProgressTrip.id}/`, {
+            apiFetch(`${baseURL}/trips/location_phone/${inProgressTrip.id}/`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(coords),
@@ -252,7 +248,7 @@ const DriverHome = () => {
         intervalRef.current = null;
       }
     }
-  }, [baseURL, inProgressTrip, org_id, userId]);
+  }, [baseURL, inProgressTrip, apiFetch]);
 
   if (loading) {
     return (

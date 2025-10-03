@@ -12,41 +12,36 @@ import clock_icon from '../../src/assets/clock_icon.png';
 
 const UpcomingTrips = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const { org_id, user_id } = useAuthContext();
-  
+  const { org_id, user_id, apiFetch } = useAuthContext();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [inProgressTrip, setInProgressTrip] = useState(null);
   const [fuelRequested, setFuelRequested] = useState(false);
 
   useEffect(() => {
-    if (org_id && user_id) {
-      const apiUrl = `${baseURL}/trips/by_user/${org_id}/${user_id}`;  // Update URL with org_id and user_id
-      fetch(apiUrl)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          const inProgress = data.find(trip => trip.t_status === 'In-progress');
-          setInProgressTrip(inProgress); // Set in-progress trip if it exists
-          setTrips(data.filter((trip) => ["Requested", "Pending"].includes(trip.t_status)));
- 
-          setLoading(false); // Loading is complete
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-          setLoading(false);
-        });
-    } else {
-      console.error("User or Organization ID missing.");
-    }
-  }, [baseURL, org_id, user_id, fuelRequested]);
+    const apiUrl = `${baseURL}/trips/by_user/`;  // Update URL with org_id and user_id
+    apiFetch(apiUrl, { method: 'GET'})
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const inProgress = data.find(trip => trip.t_status === 'In-progress');
+        setInProgressTrip(inProgress); // Set in-progress trip if it exists
+        setTrips(data.filter((trip) => ["Requested", "Pending"].includes(trip.t_status)));
+
+        setLoading(false); // Loading is complete
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      });
+  }, [baseURL,fuelRequested, apiFetch]);
 
   const handleRequestFuel = (tripId) => {
-    const url = `${baseURL}/fuel/${org_id}/${user_id}/${tripId}/`;
+    const url = `${baseURL}/fuel/${tripId}/`;
     const data = {
       f_created_by:user_id,
       f_organization_id:org_id,
@@ -59,7 +54,7 @@ const UpcomingTrips = () => {
       },
       body: JSON.stringify(data) 
     };
-    fetch(url, Options)
+    apiFetch(url, Options)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Fuel request failed");
