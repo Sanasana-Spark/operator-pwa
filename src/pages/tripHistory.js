@@ -8,49 +8,29 @@ import clock_icon from '../../src/assets/clock_icon.png';
 import truck_image from '../../src/assets/truck.png';
 
 const TripHistory = () => {
-	const { org_id, user_id, apiFetch } = useAuthInfo();
+	const baseURL = process.env.REACT_APP_BASE_URL;
+	const { apiFetch } = useAuthInfo();
 	const [trips, setTrips] = useState([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		const fetchTrips = async () => {
-			if (!org_id) return;
-
-			try {
-				const orgResp = await apiFetch(`${process.env.REACT_APP_BASE_URL}/organizations/user_org/?user_id=${user_id}`);
-
-				if (!orgResp.ok) {
-					throw new Error('Failed to fetch organization');
-				}
-				const orgData = await orgResp.json();
-				const numericOrgId = orgData.id;
-				const tripsResp = await apiFetch(`${process.env.REACT_APP_BASE_URL}/trips/${numericOrgId}/`);
-
-				if (!tripsResp.ok) {
-					throw new Error(`Network response was not ok (${tripsResp.status})`);
-				}
-
-				const tripsData = await tripsResp.json();
-				setTrips(tripsData.filter(trip => trip.t_status === 'Completed'));
-			} catch (error) {
-				console.error('Error fetching trips:', error);
-			} finally {
-				setLoading(false);
+		const apiUrl = `${baseURL}/trips/by_user/`;
+		apiFetch(apiUrl, { method: 'GET' })
+		.then((response) => {
+			if (!response.ok) {
+			throw new Error("Network response was not ok");
 			}
-		};
-
-		fetchTrips();
-	}, [org_id, user_id, apiFetch]);
-
-	if (!org_id) {
-		return (
-			<Box display='flex' justifyContent='center' alignItems='center' height='100vh'>
-				<Typography variant='h6' color='text.secondary'>
-					Loading organization info...
-				</Typography>
-			</Box>
-		);
-	}
+			return response.json();
+		})
+		.then((data) => {
+			setTrips(data.filter((trip) => trip.t_status === "Completed"));
+			setLoading(false);
+		})
+		.catch((error) => {
+			console.error("Error fetching data:", error);
+			setLoading(false);
+		});
+	}, [baseURL, apiFetch]);
 
 	if (loading) {
 		return (
