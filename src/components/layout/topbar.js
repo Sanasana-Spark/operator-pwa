@@ -32,7 +32,7 @@ import Grid from "@mui/material/Grid2";
 
 const TopBar = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const { org_name, user_id } = useAuthContext();
+  const { org_name, user_id, apiFetch} = useAuthContext();
   const [notifications, setNotifications] = useState([]);
   const [tab, setTab] = useState(2);
   const [selectedNotification, setSelectedNotification] = useState(null);
@@ -54,8 +54,8 @@ const accountOpen = Boolean(accountAnchorEl);
   // Fetch notifications based on tab (all, read, unread)
   const fetchNotifications = async (status = "unread") => {
     try {
-      const apiUrl = `${baseURL}/notifications/${user_id}?status=${status}`;
-      const response = await fetch(apiUrl);
+      const apiUrl = `${baseURL}/notifications/?status=${status}`;
+      const response = await apiFetch(apiUrl, { method: "GET" });
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
