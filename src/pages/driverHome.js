@@ -9,8 +9,14 @@ import {
   CircularProgress,
   Button,
   Alert,
+  Chip,
+  Grid,
+  Fade,
 } from "@mui/material";
 import CardMedia from "@mui/material/CardMedia";
+import FlagIcon from "@mui/icons-material/Flag"; // Destination flag
+import TripOriginIcon from "@mui/icons-material/TripOrigin"; // Perfect for "start"
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useAuthContext } from "../components/onboarding/authProvider";
 import truck_image from "../../src/assets/truck.png";
 import pin_location from "../../src/assets/pin_location.png";
@@ -27,13 +33,14 @@ const DriverHome = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openCompleteTripDialog, setOpenCompleteTripDialog] = useState(false);
   const [openStartTripDialog, setOpenStartTripDialog] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const [, setImage] = useState(null);
   const [, setOdometerReading] = useState("");
   const [, setLocation] = useState(null);
   const [success, setSuccess] = useState(null);
   const [, setError] = useState(null);
-   const intervalRef = useRef(null);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
     const apiUrl = `${baseURL}/trips/by_user/`;
@@ -92,16 +99,13 @@ const DriverHome = () => {
     };
 
     try {
-      const response = await apiFetch(
-        `${baseURL}/trips/odometer/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await apiFetch(`${baseURL}/trips/odometer/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to submit odometer reading");
@@ -136,16 +140,13 @@ const DriverHome = () => {
       or_longitude: formData.longitude,
     };
     try {
-      const response = await apiFetch(
-        `${baseURL}/trips/${selectedTrip.id}/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await apiFetch(`${baseURL}/trips/${selectedTrip.id}/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         throw new Error("Failed start trip");
@@ -220,7 +221,6 @@ const DriverHome = () => {
               or_latitude: pos.coords.latitude,
               or_longitude: pos.coords.longitude,
               or_description: "continous",
-
             };
 
             // Send to backend
@@ -264,7 +264,12 @@ const DriverHome = () => {
   }
   if (pendingTrips.length === 0 && !inProgressTrip) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
         <Typography variant="h6" color="text.secondary">
           No approved trips found. Check new trip requests.
         </Typography>
@@ -273,203 +278,312 @@ const DriverHome = () => {
   }
 
   return (
-    <Box sx={{ padding: 1, paddingTop:0, height:"80vh" ,maxHeight: "80vh", overflowY: "scroll" }}>
+    <Box
+      sx={{
+        padding: 0.5,
+        paddingTop: 0,
+        height: "80vh",
+        maxHeight: "80vh",
+        overflowY: "scroll",
+      }}
+    >
       {success && (
-        <Box sx={{
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    color: 'green',
-    border: '1px solid var(--secondary-color)',
-    zIndex: 1300, // ensures it appears above other components
-    minWidth: 300,
-  }}>
-          <Alert severity='success' onClose={() => setSuccess(null)} >{success}</Alert>
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            color: "green",
+            border: "1px solid var(--secondary-color)",
+            zIndex: 1300, // ensures it appears above other components
+            minWidth: 300,
+          }}
+        >
+          <Alert severity="success" onClose={() => setSuccess(null)}>
+            {success}
+          </Alert>
         </Box>
       )}
       {inProgressTrip && (
-        <Box>
-          
+        <Box marginTop={0}>
+ 
 
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="flex-start"
+            gap={1}
+            marginBottom={1}
+            sx={{
+              backgroundColor: "#F9FAFB",
+              borderRadius: "9999px",
+              px: 2,
+              py: 1,
+              boxShadow: 1,
+              width: "fit-content",
+              "&:hover": { boxShadow: 3, backgroundColor: "#fff" },
+              position: "relative",
+            }}
+          >
+            {/* Origin */}
+            <Box display="flex" alignItems="center" gap={0.5}
+            onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        sx={{ cursor: "pointer" }}
+        >
+              <TripOriginIcon sx={{ color: "green" }} fontSize="small" />
+              <Typography variant="body2" fontWeight={500}>
+                {inProgressTrip.t_origin_place_query}
+              </Typography>
+            </Box>
+
+            {/* Connector */}
+            <ArrowForwardIcon fontSize="small" color="action" />
+
+            {/* Destination */}
+            <Box display="flex" alignItems="center" gap={0.5}
+            onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        sx={{ cursor: "pointer" }}>
+              <FlagIcon sx={{ color: "red" }} fontSize="small" />
+              <Typography variant="body2" fontWeight={500}>
+                {inProgressTrip.t_destination_place_query}
+              </Typography>
+            </Box>
+
+            {/* Distance */}
+            <Chip
+              size="small"
+              label={inProgressTrip.t_distance}
+              variant="outlined"
+              sx={{
+                ml: 1,
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                borderRadius: "8px",
+              }}
+            />
+
+             {/* Sticky info box (shown only when hovering) */}
+      <Fade in={hovered}>
+        <Box
+          sx={{
+            mb: 2,
+            mt: 2,
+            position: "fixed",
+            bottom: "40%",
+            left: "25%",
+            zIndex: 1300,
+            backgroundColor: "white",
+            border: "2px solid var(--secondary-color)",
+            color: "var(--secondary-color)",
+            boxShadow: 3,
+            borderRadius: 2,
+            px: 2,
+            py: 1,
+            transition: "opacity 0.3s ease",
+          }}
+        >
+                  {inProgressTrip.stops.length > 0 && (
+              <Grid item xs={12}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontWeight: "bold", mb: 1 }}
+                >
+                  ({inProgressTrip.stops.length}) Stops:
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {inProgressTrip.stops.map((stop, index) => (
+                    <Chip
+                      key={index}
+                      label={`${index + 1}. ${
+                        stop.s_place_query || "Unknown Location"
+                      }`}
+                      variant="outlined"
+                      size="small"
+                      color="primary"
+                    />
+                  ))}
+                </Box>
+              </Grid>
+            )}
+
+          </Box></Fade>
+          </Box>
+
+<Box sx={{ height: '58vh', width: '100%', borderRadius: 2, overflow: 'hidden' }}>
           <Map
             origin={inProgressTrip.t_origin_place_query}
             destination={inProgressTrip.t_destination_place_query}
             key={inProgressTrip.id}
             center={inProgressTrip.t_origin_place_query}
+            stops={inProgressTrip.stops || []}
           />
-
-          <Box sx={{ display: "grid", alignItems: "center", marginBottom: 2 }}>
-          <Typography variant="body1" gutterBottom>
-           ( {inProgressTrip.t_distance} ) From {inProgressTrip.t_origin_place_query}
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            To {inProgressTrip.t_destination_place_query}
-          </Typography>
           </Box>
 
-<Box>
-  <Button variant="contained" onClick={handleOdometerReading}
-  sx={{ marginRight: 2,
-    backgroundColor: "var(--primary-color)",
-    "&:hover": {
-      backgroundColor: "var(--primary-hover-color)",
-    },
-    borderRadius: 10,
-  }}
-  >
-     Send Reading
-  </Button>
-  <Button variant="contained" onClick={handleCompleteTripReading}
-   sx={{
-                  backgroundColor: "var(--secondary-color)",
-                  "&:hover": {
-                    backgroundColor: "var(--secondary-hover-color)",
-                  },
-                  borderRadius: 10,
-                }}
-                >
-    Complete Trip
-  </Button>
-   </Box>
-
+          <Box marginTop={1} marginBottom={5}  >
+            <Button
+              variant="contained"
+              onClick={handleOdometerReading}
+              sx={{
+                marginRight: 2,
+                backgroundColor: "var(--primary-color)",
+                "&:hover": {
+                  backgroundColor: "var(--primary-hover-color)",
+                },
+                borderRadius: 10,
+              }}
+            >
+              Send Reading
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleCompleteTripReading}
+              sx={{
+                backgroundColor: "var(--secondary-color)",
+                "&:hover": {
+                  backgroundColor: "var(--secondary-hover-color)",
+                },
+                borderRadius: 10,
+              }}
+            >
+              Complete Trip
+            </Button>
           </Box>
+
+        </Box>
       )}
 
-{pendingTrips.length > 0 &&  !inProgressTrip && (
-        <Box >
-          
-            {pendingTrips.map((trip) => (
-                <Card
-                  key={trip.id}
+      {pendingTrips.length > 0 && !inProgressTrip && (
+        <Box>
+          {pendingTrips.map((trip) => (
+            <Card
+              key={trip.id}
+              sx={{
+                display: "flex",
+                marginBottom: 3,
+                borderRadius: 5,
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: 5,
+                  marginLeft: 2,
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  sx={{ width: 130, marginTop: 2 }}
+                  image={truck_image}
+                  alt="Live from space album cover"
+                />
+              </Box>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: 5,
+                  alignItems: "flex-start",
+                }}
+              >
+                <CardContent
                   sx={{
-                    display: "flex",
-                    marginBottom: 3,
-                    borderRadius: 5,
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
+                    flex: "1 0 auto",
+                    alignContent: "left",
+                    justifyContent: "left",
+                    color: "var(--main-text-color)",
+                    textAlign: "left",
                   }}
                 >
-                  <Box
+                  <Typography
+                    component="h4"
+                    variant="h4 "
                     sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      borderRadius: 5,
-                      marginLeft: 2,
-                    }}>
-                    <CardMedia
-                      component="img"
-                      sx={{ width: 130, marginTop: 2 }}
-                      image={truck_image}
-                      alt="Live from space album cover"
-                    />
-                  </Box>
+                      color: "var(--main-text-color)",
+                      fontSize: "large",
+                    }}
+                  >
+                    {trip.t_type}
+                  </Typography>
 
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      borderRadius: 5,
-                      alignItems: "flex-start",
-                    }} >
-                    <CardContent
+                  <Typography
+                    variant="h6"
+                    component="h6"
+                    sx={{ color: "var(--gray-color)", fontSize: "medium" }}
+                  >
+                    <IconButton aria-label="location">
+                      <img
+                        src={pin_location}
+                        alt="custom icon"
+                        width={20}
+                        height={25}
+                      />
+                    </IconButton>
+                    {trip.t_destination_place_query}
+                  </Typography>
+
+                  <Typography
+                    variant="h6"
+                    component="h6"
+                    sx={{ color: "var(--gray-color)", fontSize: "small" }}
+                  >
+                    <IconButton aria-label="navigation">
+                      <img
+                        src={clock_icon}
+                        alt="custom icon"
+                        width={20}
+                        height={20}
+                      />
+                    </IconButton>
+                    {trip.t_distance}
+                  </Typography>
+
+                  <Typography>
+                    {/* Start Trip Button */}
+                    <Button
+                      variant="contained"
                       sx={{
-                        flex: "1 0 auto",
-                        alignContent: "left",
-                        justifyContent: "left",
-                        color: "var(--main-text-color)",
-                        textAlign: "left",
+                        backgroundColor: "#047A9A",
+                        "&:hover": {
+                          backgroundColor: "#035F75",
+                        },
                       }}
+                      onClick={() => handleStartTripReading(trip)}
                     >
-                      <Typography
-                        component="h4"
-                        variant="h4 "
-                        sx={{
-                          color: "var(--main-text-color)",
-                          fontSize: "large",
-                        }}
-                      >
-                        {trip.t_type}
-                      </Typography>
-
-                      <Typography
-                        variant="h6"
-                        component="h6"
-                        sx={{ color: "var(--gray-color)", fontSize: "medium" }}
-                      >
-                        <IconButton aria-label="location">
-                          <img
-                            src={pin_location}
-                            alt="custom icon"
-                            width={20}
-                            height={25}
-                          />
-                        </IconButton>
-                        {trip.t_destination_place_query}
-                      </Typography>
-
-                      <Typography
-                        variant="h6"
-                        component="h6"
-                        sx={{ color: "var(--gray-color)", fontSize: "small" }}
-                      >
-                        <IconButton aria-label="navigation">
-                          <img
-                            src={clock_icon}
-                            alt="custom icon"
-                            width={20}
-                            height={20}
-                          />
-                        </IconButton>
-                        {trip.t_distance}
-                      </Typography>
-
-                      <Typography>
-                        {/* Start Trip Button */}
-                        <Button
-                          variant="contained"
-                          sx={{
-                            backgroundColor: "#047A9A",
-                            "&:hover": {
-                              backgroundColor: "#035F75",
-                            },
-                          }}
-                          onClick={() => handleStartTripReading(trip)}
-                        >
-                          Start Trip
-                        </Button>
-                      </Typography>
-                    </CardContent>
-                  </Box>
-                </Card>
-              ))}
-
-           </Box>
+                      Start Trip
+                    </Button>
+                  </Typography>
+                </CardContent>
+              </Box>
+            </Card>
+          ))}
+        </Box>
       )}
 
+      <AddOdReading
+        openDialog={openDialog}
+        setOpenDialog={cancelDialog}
+        onSubmit={handleSubmit}
+      />
 
+      <AddOdReading
+        openDialog={openCompleteTripDialog}
+        setOpenDialog={cancelDialog}
+        onSubmit={handleCompleteTrip}
+      />
 
-       <AddOdReading
-                    openDialog={openDialog}
-                    setOpenDialog={cancelDialog}
-                    onSubmit={handleSubmit}
-                    
-                    />
-
-                      <AddOdReading
-                                  openDialog={openCompleteTripDialog}
-                                  setOpenDialog={cancelDialog}
-                                  onSubmit={handleCompleteTrip}
-                                  
-                                  />
-
-                                     {/* Odometer Dialog */}
-                                        <AddOdReading
-                                                openDialog={openStartTripDialog}
-                                                setOpenDialog={cancelDialog}
-                                                onSubmit={handleStartTrip}
-                                                
-                                                />
+      {/* Odometer Dialog */}
+      <AddOdReading
+        openDialog={openStartTripDialog}
+        setOpenDialog={cancelDialog}
+        onSubmit={handleStartTrip}
+      />
     </Box>
   );
 };
