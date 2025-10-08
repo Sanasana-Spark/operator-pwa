@@ -40,10 +40,8 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
         }
         setStream(null);
     };
-    console.log(image)
 
     const initializeMedia = async (cameraFacing) => {
-        console.log(cameraFacing)
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                  video: { facingMode: cameraFacing }
