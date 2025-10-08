@@ -108,7 +108,6 @@ const accountOpen = Boolean(accountAnchorEl);
       updateStatus(notification.id, "read");
     }
   };
-  console.log("Selected notification:", selectedNotification);
 
   return (
     <Box
