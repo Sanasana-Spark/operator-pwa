@@ -10,6 +10,7 @@ import DriverHome from './pages/driverHome';
 import TripHistory from './pages/tripHistory';
 import UpcomingTrips from './pages/upcomingTrips';
 import RequestFuel from './components/request-fuel/requestFuel'; // 
+import Profile from './pages/profile';
 import './App.css';
 
 const App = () => {
@@ -29,9 +30,10 @@ const App = () => {
             <Route path="/drive" element={<SignedIn><DriverLayout><DriverHome /></DriverLayout></SignedIn>} />
             <Route path="/history" element={<SignedIn><DriverLayout><TripHistory /></DriverLayout></SignedIn>} />
             <Route path="/logout" element={<SignedIn><DriverLayout><Logout /></DriverLayout></SignedIn>} />
+            <Route path="/profile" element={<SignedIn><DriverLayout><Profile /></DriverLayout></SignedIn>} />
 
-            {/* New Route for RequestFuel */}
-            <Route path="/request-fuel" element={<SignedIn><DriverLayout><RequestFuel /></DriverLayout></SignedIn>} />
+            {/* New Route for RequestFuel this to be moved to component */}
+            <Route path="/request-fuel" element={<SignedIn><DriverLayout><RequestFuel /></DriverLayout></SignedIn>} /> 
           </Routes>
         </AuthProvider>
       </div>

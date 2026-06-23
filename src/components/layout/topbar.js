@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { UserButton } from "@clerk/clerk-react";
 import {
   IconButton,
   Badge,
   Menu,
-  MenuItem,
   Typography,
   Dialog,
   DialogTitle,
@@ -15,20 +13,13 @@ import {
   ListItem,
   ListItemText,
   Button,
-  ListItemIcon,
-  Tooltip,
   Box,
-  Divider,
   ListItemButton,
 } from "@mui/material";
-
+import { C } from '../../index'
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import Avatar from "@mui/material/Avatar";
-import Settings from "@mui/icons-material/Settings";
 import Logo from "../../assets/logo.png";
 import { useAuthContext } from "../onboarding/authProvider";
-import Logout from "@mui/icons-material/Logout";
-import Grid from "@mui/material/Grid2";
 
 const TopBar = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
@@ -41,15 +32,6 @@ const TopBar = () => {
   // State for notifications
 const [notifAnchorEl, setNotifAnchorEl] = useState(null);
 const notifOpen = Boolean(notifAnchorEl);
-
-// State for account menu
-const [accountAnchorEl, setAccountAnchorEl] = useState(null);
-const accountOpen = Boolean(accountAnchorEl);
-
-
-  const handleClose = () => {
-    setAccountAnchorEl(null);
-  };
 
   // Fetch notifications based on tab (all, read, unread)
   const fetchNotifications = async (status = "unread") => {
@@ -112,62 +94,27 @@ const accountOpen = Boolean(accountAnchorEl);
   return (
     <Box
       sx={{
-        position: "fixed",
-        top: 0,
-        zIndex: 1000,
-        width: "100%",
-        backgroundColor: "white",
-        borderBottom: "1px solid #e0e0e0",
+        height: 44,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        px: 3,
+        flexShrink: 0,
+        background: C.surface,
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          width: "100vw",
-          justifyContent: "space-between",
-        }}
-      >
-        <img
+
+      <Box sx={{ fontSize: '0.9375rem', fontWeight: 700, color: 'white', letterSpacing: '-0.2px' }}>
+         <img
           src={Logo}
           alt="logo driver"
           style={{
             maxHeight: "50px",
           }}
         />
+        </Box>
 
-        <Grid>
-          <Tooltip title="Notifications">
-            <IconButton
-              onClick={(e) => setNotifAnchorEl(e.currentTarget)}
-              color="inherit"
-              aria-label="notifications"
-            >
-              <Badge
-                badgeContent={
-                  notifications.length
-                }
-                color="error"
-              >
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          </Tooltip>
 
-          <Tooltip title="Account settings">
-            <IconButton
-              onClick={(e) => setAccountAnchorEl(e.currentTarget)}
-              size="small"
-              sx={{ ml: 2 }}
-              aria-controls={accountOpen ? "account-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={accountOpen ? "true" : undefined}
-            >
-              <UserButton />
-            </IconButton>
-          </Tooltip>
-        </Grid>
-      </Box>
       <Box sx={{ display: "flex", justifyContent: "right", width: "100%" }}>
         <Typography
           variant="body1"
@@ -177,62 +124,19 @@ const accountOpen = Boolean(accountAnchorEl);
         </Typography>
       </Box>
 
-      <Menu
-        anchorEl={accountAnchorEl}
-        id="account-menu"
-        open={accountOpen}
-        onClose={() => setAccountAnchorEl(null)}
-        slotProps={{
-          paper: {
-            elevation: 0,
-            sx: {
-              overflow: "visible",
-              filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-              mt: 1.5,
-              "& .MuiAvatar-root": {
-                width: 32,
-                height: 32,
-                ml: -0.5,
-                mr: 1,
-              },
-              "&::before": {
-                content: '""',
-                display: "block",
-                position: "absolute",
-                top: 0,
-                right: 14,
-                width: 10,
-                height: 10,
-                bgcolor: "background.paper",
-                transform: "translateY(-50%) rotate(45deg)",
-                zIndex: 0,
-              },
-            },
-          },
-        }}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-      >
-        <MenuItem onClick={handleClose}>
-          <Avatar /> Profile
-        </MenuItem>
 
-        <Divider />
 
-        <MenuItem onClick={handleClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <ListItemIcon>
-            <Logout fontSize="small" />
-          </ListItemIcon>
-          Logout
-        </MenuItem>
-      </Menu>
 
+  <IconButton
+          onClick={(e) => setNotifAnchorEl(e.currentTarget)}
+          className="top-icon-btn"
+          sx={{ border: 'none', borderRadius: '7px', width: 32, height: 32 }}
+        >
+          <Badge badgeContent={notifications.length} color="error" slotProps={{ badge: { className: 'notif-pip' } }}>
+            <NotificationsIcon sx={{ fontSize: 18, color: 'rgba(255,255,255,0.7)' }} />
+          </Badge>
+        </IconButton>
+        
       <Menu
         anchorEl={notifAnchorEl}
         open={notifOpen}

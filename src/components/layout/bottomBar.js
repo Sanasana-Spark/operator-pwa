@@ -1,17 +1,15 @@
 import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
-import Box from '@mui/material/Box';
-import HistoryIcon from '@mui/icons-material/History';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import TripOriginIcon from '@mui/icons-material/TripOrigin';
-
-const LinkWrapper = React.forwardRef((props, ref) => (
-  <Link ref={ref} {...props} />
-));
+import HomeRoundedIcon       from '@mui/icons-material/HomeRounded'
+import MapRoundedIcon        from '@mui/icons-material/MapRounded'
+import LocalGasStationRoundedIcon from '@mui/icons-material/LocalGasStationRounded'
+import PersonRoundedIcon     from '@mui/icons-material/PersonRounded'
+import { C } from '../../index'
 
 const BottomBar = () => {
+  const navigate     = useNavigate()
   const location = useLocation();
 
   const getValueFromPath = (path) => {
@@ -29,51 +27,37 @@ const BottomBar = () => {
 
   const value = getValueFromPath(location.pathname);
 
-  return (
-    <Box sx={{ width: '100vw', position: 'fixed', bottom: 0 }}>
+  const NAV = [
+  { path: '/drive',    label: 'Home',    Icon: HomeRoundedIcon },
+  { path: '/',    label: 'Upcoming',    Icon: LocalGasStationRoundedIcon },
+  { path: '/history',   label: 'History',   Icon: MapRoundedIcon },
+  { path: '/profile', label: 'Profile', Icon: PersonRoundedIcon },
+]
 
-  
+  return (
     <BottomNavigation
-      showLabels
       value={value}
-      sx={{
-        width: '100%',
-        position: 'fixed',
-        bottom: 0,
-        backgroundColor: 'white',
-        borderTop: '1px solid #e0e0e0',
-      }}
-      // style={{ width: '100%', position: 'fixed', bottom: 0 }}
+      onChange={(_, v) => navigate(NAV[v].path)}
+      sx={{ flexShrink: 0 }}
+      showLabels
+      
     >
-      <BottomNavigationAction
-        component={LinkWrapper}
-        to="/history"
-        label="History"
-        icon={<HistoryIcon />}
-        sx={{'&.Mui-selected': {
-          color: 'var(--secondary-color)'
-        }}}
-      />
-      <BottomNavigationAction
-        component={LinkWrapper}
-        to="/drive"
-        label="Drive"
-        icon={<DirectionsCarIcon />}
-        sx={{'&.Mui-selected': {
-          color: 'var(--secondary-color)'
-        }}}
-      />
-      <BottomNavigationAction
-        component={LinkWrapper}
-        to="/"
-        label="New Trips"
-        icon={<TripOriginIcon />}
-        sx={{'&.Mui-selected': {
-          color: 'var(--secondary-color)'
-        }}}
-      />
+
+        {NAV.map((n, i) => (
+          <BottomNavigationAction
+            key={n.path}
+            label={n.label}
+            icon={<n.Icon sx={{ fontSize: 22 }} />}
+            sx={{
+              '& .MuiSvgIcon-root': {
+                color: value === i ? C.lime : 'rgba(255,255,255,0.3)',
+              },
+            }}
+          />
+        ))}
+
     </BottomNavigation>
-    </Box>
+
   );
 };
 

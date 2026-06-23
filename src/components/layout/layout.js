@@ -10,6 +10,8 @@ const Layout = ({ children }) => {
 
 
 <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+
+  
       <div style={{ height: topBarHeight, width: '100vw', zIndex: 10 }}>
         <TopBar />
       </div>
