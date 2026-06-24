@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Card, CardContent, CircularProgress, IconButton } from '@mui/material';
-import CardMedia from '@mui/material/CardMedia';
-// Import the useAuthContext hook
+import { Box, Typography, CircularProgress, IconButton } from '@mui/material';
 import { useAuthContext } from '../components/onboarding/authProvider';
 // import RequestFuel from '../components/request-fuel/requestFuel';
 import '../App.css';
-import truck_image from '../../src/assets/truck.png';
-import pin_location from '../../src/assets/pin_location.png';
 import navigation_icon from '../../src/assets/navigation_icon.png';
-import clock_icon from '../../src/assets/clock_icon.png';
 
 const UpcomingTrips = () => {
   const baseURL = process.env.REACT_APP_BASE_URL;
@@ -82,110 +77,73 @@ const UpcomingTrips = () => {
   }
 
   return (
-    <Box padding={2}>
+    <Box sx={{ mx: 2, mt: 1.5, mb: 0.5 }}>
       {trips.map((trip) => (
         
-        <Card key={trip.id} sx={{ display: 'flex', marginBottom: 3, borderRadius: 5, alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div class="trip-row" key={trip.id}>
+
+           <div class="tr-head">
+            
+              <div class="tr-num">{trip.t_type}</div>
+           </div>
         
-          <Box sx={{ display: 'flex', flexDirection: 'column', borderRadius: 5, marginLeft:2 }}>
-            <CardMedia
-              component="img"
-              sx={{ width: 130, marginTop: 2,}}
-              image={truck_image}
-              alt="Live from space album cover"
-            />
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column',borderRadius: 5, alignItems: 'flex-start' }}>
-            <CardContent
-              sx={{
-                flex: '1 0 auto',
-                alignContent: 'left',
-                justifyContent: 'left',
-                color: 'var(--main-text-color)',
-                textAlign: 'left'
-              }}
-            >
-              <Typography component="h4" variant="h4 " sx={{ color: 'var(--main-text-color)', fontSize: 'large' }}>
-                {trip.t_type}
-              </Typography>
-
-              <Typography variant="h6" component="h6" sx={{ color:'var(--gray-color)', fontSize: 'medium'}}>
-                <IconButton aria-label="location">
-                  <img src={pin_location} alt="custom icon" width={20} height={25} />
-                </IconButton>
-                {trip.t_destination_place_query}
-              </Typography>
-
-              <Typography variant="h6" component="h6" sx={{ color: 'var(--gray-color)',fontSize:'small' }}>
-                <IconButton aria-label="location">
-                  <img src={clock_icon} alt="custom icon" width={20} height={20} />
-                </IconButton>
-                {trip.t_duration}
-              </Typography>
 
 
-              <Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: 'small' }}>
-                  <Typography
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                      padding: 0,
-                      paddingRight: '5px',
-                      backgroundColor: 'var(--primary-color)',
-                      color: 'white',
-                      width: 'fit-content',
-                      height: 30,
-                      fontSize: '0.55rem', 
-                      borderRadius: 1,
-                    }}
-                  >
-                    <IconButton aria-label="location">
-                      <img src={navigation_icon} alt="custom icon" width={15} height="inherit" />
-                    </IconButton>
-                    {trip.t_distance}
-                  </Typography>
+        <div class="tr-head">
+          <div class="tr-route">{trip.t_origin_place_query} → {trip.t_destination_place_query}</div>
+        </div>
+              
+       <div class="tr-body">
+         
 
-                  <Button
-                    variant="contained"
-                  
+         <div>
+          <div class="tr-stat-l">
+           <IconButton aria-label="location">
+            <img src={navigation_icon} alt="custom icon" width={15} height="inherit" />
+            </IconButton>
+
+          </div>
+
+           <div class="tr-stat-v">{trip.t_distance}</div>
+         
+          
+          </div>
+
+
+            <div> 
+               <div class="tr-stat-l"> .</div>
+                <div class="tr-stat-v">
+
+               
+
+           <button
+                    className={`btn ${trip.t_status !== 'Pending' ? 'btn-secondary' : 'btn-primary'}`}
                     onClick={() => handleRequestFuel(trip.id)}
-                    sx={{
-                      height: 30,
-                      width: 'fit-content',
-                      fontSize: '0.55rem', 
-                      backgroundColor: 'var(--secondary-color)',
-                      color: 'white',
-                    }}
                     disabled={trip.t_status !== 'Pending'}
                     >
                     {trip.t_status !== 'Pending' ? 'Requested' : 'Request Fuel'}
-                    </Button>
-                  </Box>
-                  </Typography>
-                </CardContent>
-
-                {/* <RequestFuel
-                  open={showRequestFuel}
-                  onCancel={() => setshowRequestFuel(false)}
-                  inProgressTripId={selectedTripId}
-                  onFuelRequestSuccess={handleFuelRequestSuccess}
-                /> */}
-                {/* Check if the trip is pending, and the driver has no trip in progress */}
-            {inProgressTrip && (
-              <Button
-                variant="contained"
-                color="primary"
+            </button>
+       
+              {inProgressTrip && (
+              <button
+                className="btn btn-secondary"
                 onClick={() => handleRequestFuel(trip.id)}
-                sx={{ marginTop: 2 }}
                 disabled={!fuelRequested} // Disable Start Trip button until fuel is requested
               >
                 Request Fuel
-              </Button>
+              </button>
             )}
-          </Box>
-        </Card>
+             </div>
+
+            </div>
+           
+
+       </div>
+            
+
+
+   
+        </div>
       ))}
     </Box>
   );

@@ -51,10 +51,11 @@ const TripHistory = () => {
 			{trips.map(trip => (
 			
     <div class="trip-row">
-		 <div class="tr-head">
+		<div class="tr-head">
 		<div class="tr-num">{trip.t_type}</div>
 		 <div class="tc-badge b-green">{trip.t_status}</div>
 		</div>
+		
         <div class="tr-head">
           <div class="tr-route">{trip.t_origin_place_query} → {trip.t_destination_place_query}</div>
         </div>

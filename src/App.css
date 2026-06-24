@@ -3,19 +3,180 @@
 }
 
 :root {
-  --main-bg-color: white;
-  --secondary-bg-color: whitesmoke;
-  --faded-primary-color: whitesmoke;
-  --primary-color: #047A9A;
-  --primary-hover-color: #25c3ef;
-  --secondary-color: #01947A;
-  --secondary-hover-color: #85fbe3;
-  --primary-text-color: black;
-  --secondary-text-color: gray;
-  --font-family: 'lato', sans-serif;
+  /* ==========================================================================
+     1. CORE BRAND PALETTE (From Design System)
+     ========================================================================== */
+  /* Brand Primaries */
+   --forest:   #1B4332;
+  --forest2:  #2D6A4F;
+  --forest3:  #40916C;
+  --lime:     #84BC41;
+  --lime2:    #A3CC6C;
+  --lime3:    #C8E6A0;
+  --lime-bg:  #F0F7E6;
+  --teal:     #099EC8;
+  --teal-bg:  #E3F5FB;
+  --white:    #FFFFFF;
+  --off:      #F6F8F3;
+  --surface:  #FAFCF8;
+  --ink:      #1A2318;
+  --ink2:     #3D4F3A;
+  --ink3:     #6B7E68;
+  --ink4:     #9BAD98;
+  --border:   #E4EDE1;
+  --border2:  #D0DEC9;
+  --amber:    #F4A522;
+  --amber-bg: #FEF3DA;
+  --red:      #E5363A;
+  --red-bg:   #FDEDEF;
+  --blue:     #2F7BE8;
+  --blue-bg:  #EBF2FD;
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --r:  8px;
+  --r2: 14px;
+  --sidebar-w: 200px;
+  --topbar-h:  56px;
+
+
+  --brand-forest: #1B4332;
+  --brand-forest2: #2D6A4F;
+  --brand-forest3: #40916C;
+  --brand-lime: #84BC41;
+  --brand-lime2: #A3CC6C;
+  --brand-lime3: #C8E6A0;
+  --brand-lime-bg: #F0F7E6;
+  --brand-teal: #099EC8;
+  --brand-teal-bg: #E3F5FB;
+
+  /* Backgrounds & Surfaces */
+  --brand-white: #FFFFFF;
+  --brand-off: #F6F8F3;
+  --brand-surface: #FAFCF8;
+  --brand-map-bg: #E8F2EC;
+
+  /* Ink (Text) Scale */
+  --brand-ink: #1A2318;
+  --brand-ink2: #3D4F3A;
+  --brand-ink3: #6B7E68;
+  --brand-ink4: #9BAD98;
+
+  /* Borders */
+  --brand-border: #E4EDE1;
+  --brand-border2: #D0DEC9;
+
+  /* Status Colours */
+  --brand-amber: #F4A522;
+  --brand-amber-bg: #FEF3DA;
+  --brand-red: #E5363A;
+  --brand-red-bg: #FDEDEF;
+  --brand-blue: #2F7BE8;
+  --brand-blue-bg: #EBF2FD;
+
+  /* ==========================================================================
+     2. GLOBAL APPLICATION OVERRIDES (Mapped to new brand tokens)
+     ========================================================================== */
+  --main-bg-color: var(--brand-off);         /* App page background */
+  --secondary-bg-color: var(--brand-surface); /* Alternate surface layers */
+  --faded-primary-color: var(--brand-lime-bg);
+
+  /* Mapping primary/secondary to the brand's core forest ecosystem */
+  --primary-color: var(--brand-forest);
+  --primary-hover-color: var(--brand-forest2);
+  --secondary-color: var(--brand-lime);
+  --secondary-hover-color: var(--brand-lime2);
+
+  /* Typography mapping */
+  --primary-text-color: var(--brand-ink);
+  --secondary-text-color: var(--brand-ink2);
+  --font-family: 'Lato', sans-serif;
+  
+  /* Layout Spacing Defaults */
   --padding: 16px;
   --margin: 8px;
+
+  /* ==========================================================================
+     3. REUSABLE COMPONENT TOKENS (For consistent UI architecture)
+     ========================================================================== */
+  /* Topbar Component */
+  --topbar-bg: var(--brand-forest);
+  --topbar-text: var(--brand-white);
+
+  /* Sidebar Component */
+  --sidebar-bg: var(--brand-white);
+  --sidebar-border: var(--brand-border);
+  --sidebar-text-inactive: var(--brand-ink3);
+  --sidebar-item-active-bg: var(--brand-lime-bg);
+
+  /* Table Component */
+  --table-header-bg: var(--brand-off);
+  --table-header-text: var(--brand-ink4);
+  --table-body-text: var(--brand-ink);
+  --table-divider: var(--brand-border);
+
+  /* Form & Input Component */
+  --input-bg: var(--brand-white);
+  --input-border: var(--brand-border2);
+  --input-label: var(--brand-ink3);
+  --input-placeholder: var(--brand-ink4);
+
+  /* Buttons */
+  --btn-secondary-bg: var(--brand-white);
+  --btn-secondary-border: var(--brand-border2);
+  --btn-secondary-text: var(--brand-ink2);
+
+
+  --font-primary: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Global fallback match from your previous config */
+  --font-family: var(--font-primary);
 }
+
+
+.trip-row{
+  margin:0 16px 8px;background:#162B12;border-radius:14px;
+  border:1px solid rgba(255,255,255,.05);padding:0;overflow:hidden;cursor:pointer;
+}
+.tr-head{padding:12px 14px;display:flex;align-items:center;gap:10px}
+.tr-num{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);font-family:var(--mono)}
+.tr-route{font-size:13.5px;font-weight:700;flex:1;letter-spacing:-.1px; color:(var(--secondary-text-color));}
+.tc-badge{
+  margin-left:auto;font-size:11px;font-weight:700;padding:4px 9px;
+  border-radius:20px;white-space:nowrap;flex-shrink:0;
+  background:rgba(132,188,65,.15);color:var(--lime2)
+}
+.tr-body{
+  padding:10px 14px 12px;border-top:1px solid rgba(255,255,255,.05);
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+}
+.tr-stat-l{font-size:10px;color:rgba(255,255,255,.35);margin-bottom:2px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.tr-stat-v{font-size:13px;font-weight:700;color:white}
+
+
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: none; border-radius: var(--r);
+  padding: 7px 14px; font: 600 12.5px var(--font);
+  cursor: pointer; transition: all .15s; white-space: nowrap; text-decoration: none;
+}
+.btn-primary { background: var(--forest); color: white; }
+.btn-primary:hover { background: var(--forest2); }
+.btn-secondary { background:var(--forest); color: var(--ink2); border: 1px solid var(--border2); }
+.btn-secondary:hover { border-color: var(--ink3); background: var(--off); }
+.btn-lime { background: var(--lime); color: var(--forest); }
+.btn-lime:hover { background: var(--lime2); }
+.btn-danger { background: var(--red); color: white; }
+.btn-danger:hover { opacity: .88; }
+.btn-sm { padding: 5px 10px; font-size: 11.5px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; }
+
+/* Handled explicitly via button variants */
+.btn-primary { color: var(--brand-white); }
+.btn-secondary { color: var(--brand-ink2); }
+
 
 
 .App-logo {
