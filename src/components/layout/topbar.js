@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import { C } from '../../index'
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import Logo from "../../assets/logo.png";
 import { useAuthContext } from "../onboarding/authProvider";
 
 const TopBar = () => {
@@ -104,25 +103,14 @@ const notifOpen = Boolean(notifAnchorEl);
       }}
     >
 
-      <Box sx={{ fontSize: '0.9375rem', fontWeight: 700, color: 'white', letterSpacing: '-0.2px' }}>
-         <img
-          src={Logo}
-          alt="logo driver"
-          style={{
-            maxHeight: "50px",
-          }}
-        />
-        </Box>
+          <Typography sx={{ fontSize: '0.8125rem', color: C.textSecondary , mb: 0.25 }}>
+            Sanasana 
+          </Typography>
+          <Typography sx={{ fontSize: '1.0625rem', fontWeight: "semibold", letterSpacing: '-0.3px',color: C.textPrimary   }}>
+            {org_name}
+          </Typography>
 
-
-      <Box sx={{ display: "flex", justifyContent: "right", width: "100%" }}>
-        <Typography
-          variant="body1"
-          sx={{ fontWeight: "semi-bold", color: "black" }}
-        >
-          {org_name}
-        </Typography>
-      </Box>
+  
 
 
 

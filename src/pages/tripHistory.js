@@ -1,11 +1,7 @@
 // pages/tripHistory.js
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, CircularProgress, IconButton, Button, CardMedia } from '@mui/material';
+import { Box, Typography, CircularProgress} from '@mui/material';
 import { useAuthInfo } from '../components/onboarding/useAuth';
-import pin_location from '../../src/assets/pin_location.png';
-import navigation_icon from '../../src/assets/navigation_icon.png';
-import clock_icon from '../../src/assets/clock_icon.png';
-import truck_image from '../../src/assets/truck.png';
 
 const TripHistory = () => {
 	const baseURL = process.env.REACT_APP_BASE_URL;
@@ -51,73 +47,25 @@ const TripHistory = () => {
 	}
 
 	return (
-		<Box padding={2}>
+		<Box sx={{ mx: 2, mt: 1.5, mb: 0.5 }}>
 			{trips.map(trip => (
-				<Card
-					key={trip.id}
-					sx={{
-						display: 'flex',
-						marginBottom: 3,
-						borderRadius: 5,
-						alignItems: 'flex-start',
-						justifyContent: 'space-between',
-					}}
-				>
-					<Box sx={{ display: 'flex', flexDirection: 'column', borderRadius: 5, marginLeft: 2 }}>
-						<CardMedia component='img' sx={{ width: 130, marginTop: 2 }} image={truck_image} alt='Truck' />
-					</Box>
+			
+    <div class="trip-row">
+		 <div class="tr-head">
+		<div class="tr-num">{trip.t_type}</div>
+		 <div class="tc-badge b-green">{trip.t_status}</div>
+		</div>
+        <div class="tr-head">
+          <div class="tr-route">{trip.t_origin_place_query} → {trip.t_destination_place_query}</div>
+        </div>
+        <div class="tr-body">
+          <div><div class="tr-stat-l">Distance</div><div class="tr-stat-v">{trip.t_distance}</div></div>
+          <div><div class="tr-stat-l">Duration</div><div class="tr-stat-v">{trip.t_duration}</div></div>
+          <div><div class="tr-stat-l">Date</div><div class="tr-stat-v"> {new Date(trip.t_start_date).toLocaleDateString('en-GB')}
+			</div></div>
+        </div>
+    </div>
 
-					<Box sx={{ display: 'flex', flexDirection: 'column', borderRadius: 5, alignItems: 'flex-start' }}>
-						<CardContent
-							sx={{
-								flex: '1 0 auto',
-								alignContent: 'left',
-								justifyContent: 'left',
-								color: 'var(--main-text-color)',
-								textAlign: 'left',
-							}}
-						>
-							<Typography component='h4' variant='h4' sx={{ fontSize: 'large' }}>
-								{trip.t_type}
-							</Typography>
-
-							<Typography variant='h6' sx={{ color: 'var(--gray-color)', fontSize: 'medium' }}>
-								<IconButton aria-label='location'>
-									<img src={pin_location} alt='location' width={20} height={25} />
-								</IconButton>
-								{trip.t_destination_place_query}
-							</Typography>
-
-							<Typography variant='h6' sx={{ color: 'var(--gray-color)', fontSize: 'small' }}>
-								<IconButton aria-label='clock'>
-									<img src={clock_icon} alt='clock' width={20} height={20} />
-								</IconButton>
-								{trip.t_duration}
-							</Typography>
-
-							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: 'small' }}>
-								<Button
-									variant='contained'
-									sx={{
-										padding: 0,
-										paddingRight: '5px',
-										backgroundColor: 'var(--secondary-color)',
-										width: 'fit-content',
-										height: 30,
-										fontSize: '0.55rem',
-									}}
-								>
-									<IconButton aria-label='navigation'>
-										<img src={navigation_icon} alt='navigation' width={15} height='inherit' />
-									</IconButton>
-									{trip.t_distance}
-								</Button>
-							</Box>
-
-							<Typography sx={{ color: 'var(--main-text-color)', fontSize: 'medium' }}>Status: {trip.t_status}</Typography>
-						</CardContent>
-					</Box>
-				</Card>
 			))}
 		</Box>
 	);
