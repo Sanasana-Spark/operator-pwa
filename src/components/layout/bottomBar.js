@@ -15,11 +15,13 @@ const BottomBar = () => {
   const getValueFromPath = (path) => {
     switch (path) {
       case '/history':
-        return 0;
-      case '/drive':
         return 1;
+      case '/drive':
+        return 0;
       case '/':
         return 2;
+      case '/profile':
+        return 3;
       default:
         return 1; // Default to 'Drive' if no match
     }
@@ -29,8 +31,8 @@ const BottomBar = () => {
 
   const NAV = [
   { path: '/drive',    label: 'Home',    Icon: HomeRoundedIcon },
-  { path: '/',    label: 'Upcoming',    Icon: LocalGasStationRoundedIcon },
   { path: '/history',   label: 'History',   Icon: MapRoundedIcon },
+  { path: '/',    label: 'Upcoming',    Icon: LocalGasStationRoundedIcon },
   { path: '/profile', label: 'Profile', Icon: PersonRoundedIcon },
 ]
 
