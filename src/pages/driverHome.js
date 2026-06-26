@@ -3,24 +3,15 @@ import Map from "../components/maps/singleTripMap";
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
   IconButton,
   CircularProgress,
-  Button,
   Alert,
   Chip,
   Grid,
   Fade,
 } from "@mui/material";
-import CardMedia from "@mui/material/CardMedia";
-import FlagIcon from "@mui/icons-material/Flag"; // Destination flag
-import TripOriginIcon from "@mui/icons-material/TripOrigin"; // Perfect for "start"
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useAuthContext } from "../components/onboarding/authProvider";
-import truck_image from "../../src/assets/truck.png";
-import pin_location from "../../src/assets/pin_location.png";
-import clock_icon from "../../src/assets/clock_icon.png";
+import navigation_icon from '../../src/assets/navigation_icon.png';
 import AddOdReading from "../components/driver-view/add_odometer_reading";
 
 const DriverHome = () => {
@@ -33,7 +24,7 @@ const DriverHome = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openCompleteTripDialog, setOpenCompleteTripDialog] = useState(false);
   const [openStartTripDialog, setOpenStartTripDialog] = useState(false);
-  const [hovered, setHovered] = useState(false);
+  const [hovered,] = useState(false);
 
   const [, setImage] = useState(null);
   const [, setOdometerReading] = useState("");
@@ -278,14 +269,7 @@ const DriverHome = () => {
   }
 
   return (
-    <Box
-      sx={{
-        padding: 0.5,
-        paddingTop: 0,
-        height: "80vh",
-        maxHeight: "80vh",
-        overflowY: "scroll",
-      }}
+    <Box sx={{ pb: 2 }}
     >
       {success && (
         <Box
@@ -305,52 +289,18 @@ const DriverHome = () => {
           </Alert>
         </Box>
       )}
+
       {inProgressTrip && (
-        <Box marginTop={0}>
+        <Box sx={{ pb: 2 }}>
  
 
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="flex-start"
-            gap={1}
-            marginBottom={1}
-            sx={{
-              backgroundColor: "#F9FAFB",
-              borderRadius: "9999px",
-              px: 2,
-              py: 1,
-              boxShadow: 1,
-              width: "fit-content",
-              "&:hover": { boxShadow: 3, backgroundColor: "#fff" },
-              position: "relative",
-            }}
+          <div
+            className="home-card"
           >
-            {/* Origin */}
-            <Box display="flex" alignItems="center" gap={0.5}
-            onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        sx={{ cursor: "pointer" }}
-        >
-              <TripOriginIcon sx={{ color: "green" }} fontSize="small" />
-              <Typography variant="body2" fontWeight={500}>
-                {inProgressTrip.t_origin_place_query}
-              </Typography>
-            </Box>
+            <div class="tr-head">
+              <div class="tr-route">{inProgressTrip.t_origin_place_query} → {inProgressTrip.t_destination_place_query}</div>
+            </div>
 
-            {/* Connector */}
-            <ArrowForwardIcon fontSize="small" color="action" />
-
-            {/* Destination */}
-            <Box display="flex" alignItems="center" gap={0.5}
-            onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        sx={{ cursor: "pointer" }}>
-              <FlagIcon sx={{ color: "red" }} fontSize="small" />
-              <Typography variant="body2" fontWeight={500}>
-                {inProgressTrip.t_destination_place_query}
-              </Typography>
-            </Box>
 
             {/* Distance */}
             <Chip
@@ -366,8 +316,8 @@ const DriverHome = () => {
             />
 
              {/* Sticky info box (shown only when hovering) */}
-      <Fade in={hovered}>
-        <Box
+          <Fade in={hovered}>
+            <Box
           sx={{
             mb: 2,
             mt: 2,
@@ -409,48 +359,36 @@ const DriverHome = () => {
               </Grid>
             )}
 
-          </Box></Fade>
-          </Box>
+            </Box>
+          </Fade>
 
-<Box sx={{ height: '58vh', width: '100%', borderRadius: 2, overflow: 'hidden' }}>
-          <Map
-            origin={inProgressTrip.t_origin_place_query}
-            destination={inProgressTrip.t_destination_place_query}
-            key={inProgressTrip.id}
-            center={inProgressTrip.t_origin_place_query}
-            stops={inProgressTrip.stops || []}
-          />
-          </Box>
 
-          <Box marginTop={1} marginBottom={5}  >
-            <Button
-              variant="contained"
+          </div>
+
+          <div sx={{ height: '58vh', width: '100%', borderRadius: 2, overflow: 'hidden' }}>
+            <Map
+              origin={inProgressTrip.t_origin_place_query}
+              destination={inProgressTrip.t_destination_place_query}
+              key={inProgressTrip.id}
+              center={inProgressTrip.t_origin_place_query}
+              stops={inProgressTrip.stops || []}
+            />
+          </div>
+
+          <div className="tr-body"  >
+            <button
+              className="btn-secondary"
               onClick={handleOdometerReading}
-              sx={{
-                marginRight: 2,
-                backgroundColor: "var(--primary-color)",
-                "&:hover": {
-                  backgroundColor: "var(--primary-hover-color)",
-                },
-                borderRadius: 10,
-              }}
             >
               Send Reading
-            </Button>
-            <Button
-              variant="contained"
+            </button>
+            <button
+              className="btn-primary"
               onClick={handleCompleteTripReading}
-              sx={{
-                backgroundColor: "var(--secondary-color)",
-                "&:hover": {
-                  backgroundColor: "var(--secondary-hover-color)",
-                },
-                borderRadius: 10,
-              }}
             >
               Complete Trip
-            </Button>
-          </Box>
+            </button>
+          </div>
 
         </Box>
       )}
@@ -458,110 +396,53 @@ const DriverHome = () => {
       {pendingTrips.length > 0 && !inProgressTrip && (
         <Box>
           {pendingTrips.map((trip) => (
-            <Card
-              key={trip.id}
-              sx={{
-                display: "flex",
-                marginBottom: 3,
-                borderRadius: 5,
-                alignItems: "flex-start",
-                justifyContent: "space-between",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  borderRadius: 5,
-                  marginLeft: 2,
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  sx={{ width: 130, marginTop: 2 }}
-                  image={truck_image}
-                  alt="Live from space album cover"
-                />
-              </Box>
+        <div class="trip-row" key={trip.id}>
 
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  borderRadius: 5,
-                  alignItems: "flex-start",
-                }}
-              >
-                <CardContent
-                  sx={{
-                    flex: "1 0 auto",
-                    alignContent: "left",
-                    justifyContent: "left",
-                    color: "var(--main-text-color)",
-                    textAlign: "left",
-                  }}
-                >
-                  <Typography
-                    component="h4"
-                    variant="h4 "
-                    sx={{
-                      color: "var(--main-text-color)",
-                      fontSize: "large",
-                    }}
-                  >
-                    {trip.t_type}
-                  </Typography>
+          <div class="tr-head">
+            
+              <div class="tr-type">{trip.t_type}</div>
+          </div>
 
-                  <Typography
-                    variant="h6"
-                    component="h6"
-                    sx={{ color: "var(--gray-color)", fontSize: "medium" }}
-                  >
-                    <IconButton aria-label="location">
-                      <img
-                        src={pin_location}
-                        alt="custom icon"
-                        width={20}
-                        height={25}
-                      />
-                    </IconButton>
-                    {trip.t_destination_place_query}
-                  </Typography>
+          <div class="tr-head">
+          <div class="tr-route">{trip.t_origin_place_query} → {trip.t_destination_place_query}</div>
+          </div>
 
-                  <Typography
-                    variant="h6"
-                    component="h6"
-                    sx={{ color: "var(--gray-color)", fontSize: "small" }}
-                  >
-                    <IconButton aria-label="navigation">
-                      <img
-                        src={clock_icon}
-                        alt="custom icon"
-                        width={20}
-                        height={20}
-                      />
-                    </IconButton>
-                    {trip.t_distance}
-                  </Typography>
+            <div class="tr-body">
+            <div>
+            <div class="tr-stat-l">
+            <IconButton aria-label="location">
+              <img src={navigation_icon} alt="custom icon" width={15} height="inherit" />
+              </IconButton>
 
-                  <Typography>
-                    {/* Start Trip Button */}
-                    <Button
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "#047A9A",
-                        "&:hover": {
-                          backgroundColor: "#035F75",
-                        },
-                      }}
+            </div>
+
+            <div class="tr-stat-v">{trip.t_distance}</div>
+
+            </div>
+
+
+            <div>
+              <div class="tr-stat-l"> .</div>
+              <div class="tr-stat-v">
+
+                 {/* Start Trip Button */}
+                    <button
+                    className="btn btn-primary"
                       onClick={() => handleStartTripReading(trip)}
                     >
                       Start Trip
-                    </Button>
-                  </Typography>
-                </CardContent>
-              </Box>
-            </Card>
+                    </button>
+
+              </div>
+            </div>
+         
+          
+          
+
+
+            </div>
+        
+            </div>
           ))}
         </Box>
       )}

@@ -141,17 +141,26 @@
 .tr-head{padding:12px 14px;display:flex;align-items:center;gap:10px}
 .tr-num{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);font-family:var(--mono)}
 .tr-route{font-size:13.5px;font-weight:700;flex:1;letter-spacing:-.1px; color:(var(--secondary-text-color));}
+.tr-type{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);font-family:var(--mono); flex:1; }
 .tc-badge{
   margin-left:auto;font-size:11px;font-weight:700;padding:4px 9px;
   border-radius:20px;white-space:nowrap;flex-shrink:0;
   background:rgba(132,188,65,.15);color:var(--lime2)
 }
-.tr-body{
+.tr-body-history{
   padding:10px 14px 12px;border-top:1px solid rgba(255,255,255,.05);
   display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
 }
+.tr-body{
+  padding:10px 14px 12px;border-top:1px solid rgba(255,255,255,.05);
+  display:grid;grid-template-columns:repeat(2,1fr);gap:8px;
+}
 .tr-stat-l{font-size:10px;color:rgba(255,255,255,.35);margin-bottom:2px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
 .tr-stat-v{font-size:13px;font-weight:700;color:white}
+.home-card{
+  display: flex; align-items: center; justify-content: flex-start; gap: 1; margin-bottom: 1;
+  background-color: var(--brand-forest);
+}
 
 
 
@@ -162,20 +171,22 @@
   padding: 7px 14px; font: 600 12.5px var(--font);
   cursor: pointer; transition: all .15s; white-space: nowrap; text-decoration: none;
 }
-.btn-primary { background: var(--forest); color: white; }
-.btn-primary:hover { background: var(--forest2); }
+.btn-primary { background: var(--brand-lime); color: white; }
+.btn-primary:hover { background: var(--brand-lime-bg); color: var(--brand-lime) ; }
 .btn-secondary { background:var(--forest); color: var(--ink2); border: 1px solid var(--border2); }
 .btn-secondary:hover { border-color: var(--ink3); background: var(--off); }
+.btn-secondary-disabled { background:rgba(255,255,255,.3); color: var(--ink2); border: 1px solid var(--border2); }
+.btn-secondary-disabled:hover { border-color: var(--ink3); background: var(--forest); }
 .btn-lime { background: var(--lime); color: var(--forest); }
 .btn-lime:hover { background: var(--lime2); }
 .btn-danger { background: var(--red); color: white; }
 .btn-danger:hover { opacity: .88; }
-.btn-sm { padding: 5px 10px; font-size: 11.5px; }
+.btn-sm { padding: 5px 10px; font-size: 11.5px; } 
 .btn-xs { padding: 3px 8px; font-size: 11px; }
 
 /* Handled explicitly via button variants */
 .btn-primary { color: var(--brand-white); }
-.btn-secondary { color: var(--brand-ink2); }
+.btn-secondary { color: var(--brand-ink2); } 
 
 
 

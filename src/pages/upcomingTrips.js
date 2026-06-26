@@ -84,7 +84,7 @@ const UpcomingTrips = () => {
 
            <div class="tr-head">
             
-              <div class="tr-num">{trip.t_type}</div>
+              <div class="tr-type">{trip.t_type}</div>
            </div>
         
 
@@ -117,7 +117,7 @@ const UpcomingTrips = () => {
                
 
            <button
-                    className={`btn ${trip.t_status !== 'Pending' ? 'btn-secondary' : 'btn-primary'}`}
+                    className={`btn ${trip.t_status !== 'Pending' ? 'btn-secondary-disabled' :'btn-primary' }`}
                     onClick={() => handleRequestFuel(trip.id)}
                     disabled={trip.t_status !== 'Pending'}
                     >

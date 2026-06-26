@@ -30,7 +30,7 @@ const TripHistory = () => {
 
 	if (loading) {
 		return (
-			<Box display='flex' justifyContent='center' alignItems='center' height='100vh'>
+			<Box sx={{ mx: 2, mt: 1.5, mb: 0.5 }}>
 				<CircularProgress />
 			</Box>
 		);
@@ -38,7 +38,7 @@ const TripHistory = () => {
 
 	if (trips.length === 0) {
 		return (
-			<Box display='flex' justifyContent='center' alignItems='center' height='100vh'>
+			<Box sx={{ mx: 2, mt: 1.5, mb: 0.5 }}>
 				<Typography variant='h6' color='text.secondary'>
 					No completed trips found.
 				</Typography>
@@ -55,11 +55,11 @@ const TripHistory = () => {
 		<div class="tr-num">{trip.t_type}</div>
 		 <div class="tc-badge b-green">{trip.t_status}</div>
 		</div>
-		
+
         <div class="tr-head">
           <div class="tr-route">{trip.t_origin_place_query} → {trip.t_destination_place_query}</div>
         </div>
-        <div class="tr-body">
+        <div class="tr-body-history">
           <div><div class="tr-stat-l">Distance</div><div class="tr-stat-v">{trip.t_distance}</div></div>
           <div><div class="tr-stat-l">Duration</div><div class="tr-stat-v">{trip.t_duration}</div></div>
           <div><div class="tr-stat-l">Date</div><div class="tr-stat-v"> {new Date(trip.t_start_date).toLocaleDateString('en-GB')}
