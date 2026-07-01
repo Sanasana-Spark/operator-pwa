@@ -158,8 +158,12 @@
 .tr-stat-l{font-size:10px;color:rgba(255,255,255,.35);margin-bottom:2px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
 .tr-stat-v{font-size:13px;font-weight:700;color:white}
 .home-card{
-  display: flex; align-items: center; justify-content: flex-start; gap: 1; margin-bottom: 1;
+  align-items: center; margin-bottom: 1;
   background-color: var(--brand-forest);
+}
+.home-box{
+  margin:0 8px 4px;background:inherit;border-radius:10px;
+  padding:0;overflow:hidden;cursor:pointer;
 }
 
 

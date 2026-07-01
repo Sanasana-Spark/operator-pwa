@@ -269,7 +269,7 @@ const DriverHome = () => {
   }
 
   return (
-    <Box sx={{ pb: 2 }}
+    <Box sx={{ mx: 2, mt: 1.5, mb: 0.5 }}
     >
       {success && (
         <Box
@@ -291,29 +291,26 @@ const DriverHome = () => {
       )}
 
       {inProgressTrip && (
-        <Box sx={{ pb: 2 }}>
+        <div class="home-box">
  
 
           <div
             className="home-card"
           >
-            <div class="tr-head">
+          <div class="tr-head">
               <div class="tr-route">{inProgressTrip.t_origin_place_query} → {inProgressTrip.t_destination_place_query}</div>
             </div>
 
-
-            {/* Distance */}
-            <Chip
-              size="small"
-              label={inProgressTrip.t_distance}
-              variant="outlined"
-              sx={{
-                ml: 1,
-                fontSize: "0.75rem",
-                fontWeight: 500,
-                borderRadius: "8px",
-              }}
-            />
+             <div class="tr-body">
+              <div>
+                <div class="tr-stat-l"> Distance</div>
+                <div class="tr-stat-v"> {inProgressTrip.t_distance} </div>
+              </div>
+              <div>
+                <div class="tr-stat-l"> Stops</div>
+                <div class="tr-stat-v"> {inProgressTrip.stops.length} </div>
+              </div>
+             </div>
 
              {/* Sticky info box (shown only when hovering) */}
           <Fade in={hovered}>
@@ -377,24 +374,24 @@ const DriverHome = () => {
 
           <div className="tr-body"  >
             <button
-              className="btn-secondary"
+              className="btn btn-lime"
               onClick={handleOdometerReading}
             >
               Send Reading
             </button>
             <button
-              className="btn-primary"
+              className="btn btn-primary"
               onClick={handleCompleteTripReading}
             >
               Complete Trip
             </button>
           </div>
 
-        </Box>
+        </div>
       )}
 
       {pendingTrips.length > 0 && !inProgressTrip && (
-        <Box>
+        <>
           {pendingTrips.map((trip) => (
         <div class="trip-row" key={trip.id}>
 
@@ -444,7 +441,7 @@ const DriverHome = () => {
         
             </div>
           ))}
-        </Box>
+        </>
       )}
 
       <AddOdReading

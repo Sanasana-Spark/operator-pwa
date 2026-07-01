@@ -11,8 +11,9 @@ import {
 } from '@mui/material';
 import FlipCameraAndroidIcon from "@mui/icons-material/FlipCameraAndroid";
 
+
 const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
-    const [, setFormData] = useState({});
+    const [formData, setFormData] = useState({});
     const[saving , setSaving] = useState(false);
     const [image, setImage] = useState(null);
     const [odometerReading, setOdometerReading] = useState('');
@@ -21,6 +22,7 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const [cameraFacing, setCameraFacing] = useState("environment"); // Default to back camera
+    console.log("formData", formData)
 
 
     const takePicture = () => {
@@ -121,6 +123,10 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
         initializeMedia();
     };
 
+    // This safely handles undefined or null values
+    // const isButtonDisabled = saving || !formData.odometerReading?.trim() || !formData.image;
+    const isButtonDisabled = saving ;
+
     return (
         <Dialog
             open={openDialog}
@@ -198,7 +204,7 @@ const AddOdometerReading = ({ openDialog, setOpenDialog, onSubmit }) => {
                 <Button
                     variant="contained"
                     onClick={handleSubmit}
-                    disabled={saving}
+                    disabled={isButtonDisabled}
                     sx={{ marginLeft: 1, backgroundColor: 'var(--secondary-color)', color: 'white' }}
                 >
                     {saving ? 'Submitting...' : 'Submit'}
